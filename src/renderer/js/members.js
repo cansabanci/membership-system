@@ -74,11 +74,31 @@ function readMemberForm() {
     };
 }
 
+function isValidYear(value) {
+    if (!value) return true; // boş bırakılabilir
+    if (!/^\d{4}$/.test(String(value))) return false;
+    const year = Number(value);
+    return year >= MIN_YEAR && year <= CURRENT_YEAR;
+}
+
+function isValidMembershipDate(value) {
+    if (!value) return true; // boş bırakılabilir
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const year = Number(value.slice(0, 4));
+    return year >= 1950 && year <= CURRENT_YEAR + 5;
+}
+
 // Zorunlu alan / format kontrolü. Geçerliyse null, değilse hata mesajı döner.
 function validateMemberForm(data) {
     if (!data.adsoyad) return 'Ad Soyad boş bırakılamaz.';
     if (!data.bolum) return 'Lütfen bir bölüm seçin veya girin.';
     if (data.email && !EMAIL_REGEX.test(data.email)) return 'Mail adresi geçerli görünmüyor.';
+    if (!isValidYear(data.mezuniyet)) return `Mezuniyet yılı ${MIN_YEAR} ile ${CURRENT_YEAR} arasında, 4 haneli bir yıl olmalı.`;
+    if (!isValidMembershipDate(data.uyelikGiris)) return 'Üyelik giriş tarihi geçerli değil.';
+    if (!isValidMembershipDate(data.uyelikCikis)) return 'Üyelik çıkış tarihi geçerli değil.';
+    if (data.uyelikGiris && data.uyelikCikis && data.uyelikGiris > data.uyelikCikis) {
+        return 'Üyelik çıkış tarihi, giriş tarihinden önce olamaz.';
+    }
     if (data.aidatlar.length === 0) return 'Lütfen en az bir aidat dönemi ekleyin!';
     return null;
 }

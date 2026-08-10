@@ -1,5 +1,9 @@
 const { ipcRenderer } = require('electron');
 
+// Tarih/yıl doğrulamasında members.js ile paylaşılan sabitler
+const CURRENT_YEAR = new Date().getFullYear();
+const MIN_YEAR = 1959;
+
 // 👇 Kullanıcı rolüne göre yetkilendirme
 let currentUserRole = 'viewer'; // varsayılan olarak viewer (güvenlik amaçlı)
 
@@ -39,6 +43,18 @@ window.addEventListener('DOMContentLoaded', () => {
     if (savedTitle) {
         document.getElementById('editableTitle').innerText = savedTitle;
     }
+
+    // Saçma tarih/yıl girişini (ör. yıl olarak "20000000") arayüz seviyesinde engelle
+    const graduationInput = document.getElementById('graduation');
+    graduationInput.min = MIN_YEAR;
+    graduationInput.max = CURRENT_YEAR;
+
+    const maxMembershipDate = `${CURRENT_YEAR + 5}-12-31`;
+    ['uyelikGiris', 'uyelikCikis'].forEach((id) => {
+        const input = document.getElementById(id);
+        input.min = '1950-01-01';
+        input.max = maxMembershipDate;
+    });
 });
 
 function saveTitle() {
