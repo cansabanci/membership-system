@@ -1,4 +1,4 @@
-const { ipcRenderer } = require('electron');
+// ipcRenderer, js/ui.js tarafından bu sayfada zaten tanımlanıyor (script'ler aynı üst düzey kapsamı paylaşır).
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
