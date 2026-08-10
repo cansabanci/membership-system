@@ -28,7 +28,7 @@ ipcRenderer.on('login-failed', () => {
 
 // Uyarı kutusunu göster
 function showError(message) {
-    const errorDiv = document.getElementById('error');
+    const errorDiv = document.getElementById('loginError');
     errorDiv.textContent = message;
     errorDiv.style.display = 'block';
 }

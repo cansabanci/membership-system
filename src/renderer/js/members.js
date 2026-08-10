@@ -279,6 +279,7 @@ function addMemberToTable(member) {
 
     const toggleCell = row.insertCell(7);
     const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'btn-detail';
     toggleBtn.textContent = 'Detaylar';
     toggleBtn.onclick = () => {
         detayRow.style.display = detayRow.style.display === 'none' ? 'table-row' : 'none';
@@ -286,14 +287,14 @@ function addMemberToTable(member) {
     toggleCell.appendChild(toggleBtn);
 
     const editBtn = document.createElement('span');
+    editBtn.className = 'icon-btn icon-btn-edit';
     editBtn.innerHTML = "<i class='fas fa-edit'></i>";
-    editBtn.style.cursor = 'pointer';
     editBtn.onclick = () => editMember(member);
     row.insertCell(8).appendChild(editBtn);
 
     const deleteBtn = document.createElement('span');
+    deleteBtn.className = 'icon-btn icon-btn-delete';
     deleteBtn.innerHTML = "<i class='fas fa-trash'></i>";
-    deleteBtn.style.cursor = 'pointer';
     deleteBtn.onclick = () => {
         ipcRenderer.send('delete-member', member.id);
         row.remove();

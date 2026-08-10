@@ -1,0 +1,30 @@
+/* Marka paleti: logo & bayraktan türetildi — kırmızı (ODTÜ/miras), lacivert (amblem çerçevesi), deniz mavisi (Mersin). */
+:root {
+  --ink: #141b2e;
+  --ink-soft: #3a4258;
+  --muted: #667085;
+  --line: #e3e6ec;
+  --paper: #f5f6f9;
+  --surface: #ffffff;
+
+  --red: #c8102e;
+  --red-deep: #970c22;
+  --red-soft: #fbe7ea;
+
+  --sea: #0f6f9e;
+  --sea-deep: #0b5679;
+  --sea-soft: #e2f0f6;
+
+  --good: #1a8a55;
+  --good-soft: #e2f5ea;
+  --bad: #c8102e;
+  --bad-soft: #fbe7ea;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-card: 0 1px 2px rgba(20, 27, 46, 0.06), 0 6px 20px -8px rgba(20, 27, 46, 0.16);
+
+  --font-ui: "Segoe UI", "Segoe UI Variable Text", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Segoe UI Semibold", "Segoe UI", "Segoe UI Variable Display", sans-serif;
+}

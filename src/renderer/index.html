@@ -6,188 +6,230 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Üye Kayıt Sistemi</title>
+    <link rel="stylesheet" href="css/tokens.css">
     <link rel="stylesheet" href="css/app.css">
 </head>
 
 <body>
 
-    <div id="headerBar">
-        <img src="../../images/turkbayragi.png" alt="Türk Bayrağı" style="height: 80px;">
-        <h1 id="editableTitle" contenteditable="true" onblur="saveTitle()">Mersin ODTÜ Mezunlar Üye Kayıt Sistemi</h1>
-        <img src="../../images/logo.jpg" alt="Logo" style="height: 80px;">
+    <header class="topbar">
+        <div class="topbar-brand">
+            <img src="../../images/logo.jpg" alt="Mersin ODTÜ Mezunları Derneği" class="brand-logo">
+            <div class="brand-text">
+                <span class="eyebrow">Mersin ODTÜ Mezunları Derneği</span>
+                <h1 id="editableTitle" contenteditable="true" onblur="saveTitle()">Mersin ODTÜ Mezunlar Üye Kayıt Sistemi</h1>
+            </div>
+        </div>
+        <img src="../../images/turkbayragi.png" alt="Türk Bayrağı" class="brand-flag">
+    </header>
+
+    <div id="errorBanner" class="error-banner"></div>
+    <div id="backupMessage" class="backup-banner" style="display:none;">
+        <i class="fas fa-cloud-arrow-up"></i> Veriler yedekleniyor, lütfen bekleyin...
     </div>
 
-    <div id="errorBanner"></div>
+    <main class="content">
 
-    <input type="hidden" id="editingRowIndex">
+        <section class="panel" aria-labelledby="formPanelTitle">
+            <div class="panel-head">
+                <div>
+                    <h2 id="formPanelTitle">Üye Kaydı</h2>
+                    <p class="panel-sub">Yeni bir üye ekleyin ya da mevcut kaydı düzenleyin.</p>
+                </div>
+            </div>
 
-    <div class="form-wrapper">
+            <input type="hidden" id="editingRowIndex">
+            <input type="hidden" id="editingPhoto">
 
-        <div class="form-group">
-            <label for="name">Ad Soyad:</label>
-            <input type="text" id="name" placeholder="Ad Soyad">
-        </div>
+            <div class="form-section">
+                <h3 class="section-label"><i class="fas fa-id-card"></i>Kişisel Bilgiler</h3>
+                <div class="field-grid">
+                    <div class="form-group">
+                        <label for="name">Ad Soyad</label>
+                        <input type="text" id="name" placeholder="Ad Soyad">
+                    </div>
+                    <div class="form-group">
+                        <label for="department">Bölüm</label>
+                        <select id="department" onchange="checkCustomDepartment()"></select>
+                        <input type="text" id="customDepartment" placeholder="Bölüm giriniz..." style="display: none;">
+                    </div>
+                    <div class="form-group">
+                        <label for="graduation">Mezuniyet Yılı</label>
+                        <input type="text" id="graduation" placeholder="2022">
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label for="email">Mail Adresi:</label>
-            <input type="email" id="email" placeholder="ornek@mail.com">
-        </div>
+            <div class="form-section">
+                <h3 class="section-label"><i class="fas fa-address-book"></i>İletişim</h3>
+                <div class="field-grid">
+                    <div class="form-group">
+                        <label for="email">Mail Adresi</label>
+                        <input type="email" id="email" placeholder="ornek@mail.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="telefon">Telefon Numarası</label>
+                        <input type="tel" id="telefon" placeholder="05xxxxxxxxx">
+                    </div>
+                    <div class="form-group">
+                        <label for="sehir">Yaşadığı Şehir</label>
+                        <input type="text" id="sehir" placeholder="Şehir">
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label for="telefon">Telefon Numarası:</label>
-            <input type="tel" id="telefon" placeholder="05xxxxxxxxx">
-        </div>
+            <div class="form-section">
+                <h3 class="section-label"><i class="fas fa-briefcase"></i>Kariyer</h3>
+                <div class="field-grid">
+                    <div class="form-group">
+                        <label for="isyeri">Çalıştığı Kurum</label>
+                        <input type="text" id="isyeri" placeholder="İşyeri adı">
+                    </div>
+                    <div class="form-group">
+                        <label for="meslek">Mesleği</label>
+                        <input type="text" id="meslek" placeholder="Meslek">
+                    </div>
+                    <div class="form-group">
+                        <label for="pozisyon">Pozisyon</label>
+                        <input type="text" id="pozisyon" placeholder="Pozisyon">
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label for="department">Bölüm:</label>
-            <select id="department" onchange="checkCustomDepartment()"></select>
-            <input type="text" id="customDepartment" placeholder="Bölüm giriniz..." style="display: none;">
-        </div>
+            <div class="form-section">
+                <h3 class="section-label"><i class="fas fa-id-badge"></i>Üyelik</h3>
+                <div class="field-grid">
+                    <div class="form-group">
+                        <label for="uyelikGiris">Üyelik Giriş Tarihi</label>
+                        <input type="date" id="uyelikGiris">
+                    </div>
+                    <div class="form-group">
+                        <label for="uyelikCikis">Üyelik Çıkış Tarihi</label>
+                        <input type="date" id="uyelikCikis">
+                    </div>
+                    <div class="form-group">
+                        <label for="photoUpload">Fotoğraf</label>
+                        <input type="file" id="photoUpload">
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label for="graduation">Mezuniyet Yılı:</label>
-            <input type="text" id="graduation" placeholder="2022">
-        </div>
+            <div class="form-section">
+                <h3 class="section-label"><i class="fas fa-hand-holding-dollar"></i>Aidat &amp; Burs</h3>
 
-        <div class="form-group">
-            <label for="isyeri">Çalıştığı Kurum:</label>
-            <input type="text" id="isyeri" placeholder="İşyeri adı">
-        </div>
+                <div class="aidat-picker">
+                    <div class="form-group">
+                        <label for="aidatDonemiSelect">Aidat Dönemi</label>
+                        <select id="aidatDonemiSelect">
+                            <option value="2024-2025">2024-2025</option>
+                            <option value="2023-2024">2023-2024</option>
+                            <option value="2022-2023">2022-2023</option>
+                            <option value="2021-2022">2021-2022</option>
+                        </select>
+                    </div>
+                    <label class="check-field" for="aidatOdendiCheck">
+                        <input type="checkbox" id="aidatOdendiCheck">
+                        Ödendi mi?
+                    </label>
+                    <button type="button" class="btn-secondary" onclick="addAidatToList()"><i class="fas fa-plus"></i>Listeye Ekle</button>
+                </div>
 
-        <div class="form-group">
-            <label for="meslek">Mesleği:</label>
-            <input type="text" id="meslek" placeholder="Meslek">
-        </div>
+                <table class="aidat-mini-table" id="aidatTable">
+                    <thead>
+                        <tr>
+                            <th>Dönem</th>
+                            <th>Ödendi mi?</th>
+                            <th>Sil</th>
+                        </tr>
+                    </thead>
+                    <tbody id="aidatTableBody"></tbody>
+                </table>
 
-        <div class="form-group">
-            <label for="pozisyon">Pozisyon:</label>
-            <input type="text" id="pozisyon" placeholder="Pozisyon">
-        </div>
+                <div class="field-grid" style="margin-top: 18px;">
+                    <div class="form-group">
+                        <label for="bursMiktar">Burs Miktarı</label>
+                        <input type="number" id="bursMiktar" placeholder="Burs Miktarı (₺)">
+                    </div>
+                    <div class="form-group">
+                        <label for="bursTip">Burs Türü</label>
+                        <select id="bursTip">
+                            <option value="Aylık">Aylık</option>
+                            <option value="Yıllık">Yıllık</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label for="sehir">Yaşadığı Şehir:</label>
-            <input type="text" id="sehir" placeholder="Şehir">
-        </div>
+            <div class="panel-actions">
+                <button onclick="saveMember()" id="saveButton" class="btn-primary"><i class="fas fa-check"></i>Kaydet</button>
+                <button onclick="updateMember()" id="updateButton" class="btn-primary" style="display:none;"><i class="fas fa-check"></i>Güncelle</button>
+            </div>
+        </section>
 
-        <div class="form-group">
-            <label for="uyelikGiris">Üyelik Giriş Tarihi:</label>
-            <input type="date" id="uyelikGiris">
-        </div>
+        <section class="panel" aria-labelledby="listPanelTitle">
+            <div class="panel-head">
+                <div>
+                    <h2 id="listPanelTitle">Kayıtlı Üyeler</h2>
+                    <p class="panel-sub">Üyeleri arayın, aidat durumuna göre filtreleyin.</p>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label for="uyelikCikis">Üyelik Çıkış Tarihi:</label>
-            <input type="date" id="uyelikCikis">
-        </div>
+            <div class="toolbar">
+                <div class="search-box">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" id="search" placeholder="İsim veya bölüme göre ara..." onkeyup="filterMembers()">
+                </div>
 
-    </div>
+                <div class="filter-group">
+                    <div class="form-group compact">
+                        <label for="donemFiltre">Dönem</label>
+                        <select id="donemFiltre">
+                            <option value="">Tümü</option>
+                            <option value="2021-2022">2021-2022</option>
+                            <option value="2022-2023">2022-2023</option>
+                            <option value="2023-2024">2023-2024</option>
+                            <option value="2024-2025">2024-2025</option>
+                        </select>
+                    </div>
+                    <div class="form-group compact">
+                        <label for="odemeFiltre">Ödeme Durumu</label>
+                        <select id="odemeFiltre">
+                            <option value="">Tümü</option>
+                            <option value="1">Ödedi</option>
+                            <option value="0">Ödemedi</option>
+                        </select>
+                    </div>
+                    <button class="btn-secondary" onclick="filterByDonem()"><i class="fas fa-filter"></i>Filtrele</button>
+                    <button class="btn-ghost" onclick="clearFilter()">Temizle</button>
+                </div>
+            </div>
 
-    <div class="form-wrapper">
-        <div class="form-group">
-            <label for="aidatDonemiSelect">Aidat Dönemi Seç:</label>
-            <select id="aidatDonemiSelect">
-                <option value="2024-2025">2024-2025</option>
-                <option value="2023-2024">2023-2024</option>
-                <option value="2022-2023">2022-2023</option>
-                <option value="2021-2022">2021-2022</option>
-            </select>
-        </div>
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Fotoğraf</th>
+                            <th>Ad Soyad</th>
+                            <th>Bölüm</th>
+                            <th>Mezuniyet Yılı</th>
+                            <th>Aidat Dönemi</th>
+                            <th>Aidat Durumu</th>
+                            <th>Burs</th>
+                            <th>Detaylar</th>
+                            <th>Düzenle</th>
+                            <th>Sil</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memberTable"></tbody>
+                </table>
+            </div>
+        </section>
 
-        <div class="form-group">
-            <label for="aidatOdendiCheck">Ödendi mi?</label>
-            <input type="checkbox" id="aidatOdendiCheck">
-        </div>
-
-        <button type="button" onclick="addAidatToList()">Listeye Ekle</button>
-    </div>
-
-    <table class="aidat-mini-table" id="aidatTable">
-        <thead>
-            <tr>
-                <th>Dönem</th>
-                <th>Ödendi mi?</th>
-                <th>Sil</th>
-            </tr>
-        </thead>
-        <tbody id="aidatTableBody"></tbody>
-    </table>
-
-    <div class="form-wrapper">
-        <div class="form-group">
-            <label for="bursMiktar">Burs Miktarı:</label>
-            <input type="number" id="bursMiktar" placeholder="Burs Miktarı (₺)">
-        </div>
-
-        <div class="form-group">
-            <label for="bursTip">Burs Türü:</label>
-            <select id="bursTip">
-                <option value="Aylık">Aylık</option>
-                <option value="Yıllık">Yıllık</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="photoUpload">Fotoğraf Yükle:</label>
-            <input type="file" id="photoUpload">
-        </div>
-    </div>
-
-    <button onclick="saveMember()" id="saveButton">Kaydet</button>
-    <button onclick="updateMember()" id="updateButton" style="display:none;">Güncelle</button>
-
-    <h2>Kayıtlı Üyeler</h2>
-
-    <label for="search">Üye Ara:</label>
-    <input type="text" id="search" placeholder="Arama yap..." onkeyup="filterMembers()">
-
-    <div style="margin-top: 30px;">
-        <h3>Aidat Dönemi Filtrele</h3>
-        <label for="donemFiltre">Dönem:</label>
-        <select id="donemFiltre">
-            <option value="">Tümü</option>
-            <option value="2021-2022">2021-2022</option>
-            <option value="2022-2023">2022-2023</option>
-            <option value="2023-2024">2023-2024</option>
-            <option value="2024-2025">2024-2025</option>
-        </select>
-
-        <label for="odemeFiltre">Ödeme Durumu:</label>
-        <select id="odemeFiltre">
-            <option value="">Tümü</option>
-            <option value="1">Ödedi</option>
-            <option value="0">Ödemedi</option>
-        </select>
-
-        <button onclick="filterByDonem()">Filtrele</button>
-        <button onclick="clearFilter()">Filtreyi Temizle</button>
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Fotoğraf</th>
-                <th>Ad Soyad</th>
-                <th>Bölüm</th>
-                <th>Mezuniyet Yılı</th>
-                <th>Aidat Dönemi</th>
-                <th>Aidat Durumu</th>
-                <th>Burs</th>
-                <th>Detaylar</th>
-                <th>Düzenle</th>
-                <th>Sil</th>
-            </tr>
-        </thead>
-        <tbody id="memberTable"></tbody>
-    </table>
+    </main>
 
     <footer id="footer">
-        Telif Hakkı © 2025 Ünsal Okuducu & Mehmet Can Sabancı. Tüm Hakları Saklıdır.
+        Telif Hakkı © 2025 Ünsal Okuducu &amp; Mehmet Can Sabancı. Tüm Hakları Saklıdır.
     </footer>
-
-    <input type="hidden" id="editingPhoto">
-
-    <div id="backupMessage" style="display:none; text-align:center; padding:10px; font-weight:bold; color:#2f855a;">
-        💾 Veriler yedekleniyor, lütfen bekleyin...
-    </div>
 
     <script src="js/ui.js"></script>
     <script src="js/members.js"></script>

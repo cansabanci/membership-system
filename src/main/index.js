@@ -24,8 +24,8 @@ if (!fs.existsSync(photosDir)) fs.mkdirSync(photosDir, { recursive: true });
 
 function createLoginWindow() {
   loginWindow = new BrowserWindow({
-    width: 400,
-    height: 500,
+    width: 420,
+    height: 620,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
