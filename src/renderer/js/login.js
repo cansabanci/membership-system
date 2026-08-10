@@ -21,9 +21,9 @@ ipcRenderer.on('login-success', (event, role) => {
     // Giriş başarılıysa bu pencere main süreç tarafından zaten kapatılıyor
 });
 
-// Giriş başarısızsa uyarı göster
-ipcRenderer.on('login-failed', () => {
-    showError("Geçersiz e-posta veya şifre.");
+// Giriş başarısızsa uyarı göster (main süreç neden başarısız olduğunu da bildirir)
+ipcRenderer.on('login-failed', (event, message) => {
+    showError(message || "Geçersiz e-posta veya şifre.");
 });
 
 // Uyarı kutusunu göster
