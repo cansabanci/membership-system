@@ -1,0 +1,50 @@
+{
+    "Mimarlık Fakültesi": [
+      "Mimarlık",
+      "Şehir ve Bölge Planlama",
+      "Endüstriyel Tasarım"
+    ],
+    "Fen Edebiyat Fakültesi": [
+      "Biyoloji",
+      "Kimya",
+      "Fizik",
+      "Matematik",
+      "Moleküler Biyoloji ve Genetik",
+      "Tarih",
+      "Felsefe",
+      "Psikoloji",
+      "Sosyoloji",
+      "İstatistik"
+    ],
+    "İktisadi ve İdari Bilimler Fakültesi": [
+      "İşletme",
+      "Ekonomi",
+      "Uluslararası İlişkiler",
+      "Siyaset Bilimi ve Kamu Yönetimi"
+    ],
+    "Eğitim Fakültesi": [
+      "Bilgisayar ve Öğretim Teknolojileri Eğitimi",
+      "Eğitim Bilimleri",
+      "İlköğretim",
+      "Yabancı Diller Eğitimi",
+      "Beden Eğitimi ve Spor",
+      "Ortaöğretim Fen ve Matematik Alanları Eğitimi"
+    ],
+    "Mühendislik Fakültesi": [
+      "Havacılık ve Uzay Mühendisliği",
+      "Kimya Mühendisliği",
+      "İnşaat Mühendisliği",
+      "Bilgisayar Mühendisliği",
+      "Elektrik ve Elektronik Mühendisliği",
+      "Mühendislik Bilimleri",
+      "Çevre Mühendisliği",
+      "Gıda Mühendisliği",
+      "Jeoloji Mühendisliği",
+      "Endüstri Mühendisliği",
+      "Makine Mühendisliği",
+      "Metalurji ve Malzeme Mühendisliği",
+      "Maden Mühendisliği",
+      "Petrol ve Doğal Gaz Mühendisliği"
+    ]
+  }
+  

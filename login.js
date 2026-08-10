@@ -1,0 +1,34 @@
+const { ipcRenderer } = require('electron');
+
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+    e.preventDefault(); // Formun sayfayı yenilemesini engelle
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) {
+        showError("Lütfen e-posta ve şifre girin.");
+        return;
+    }
+
+    // Giriş bilgilerini main.js'e gönder
+    ipcRenderer.send('login-attempt', { email, password });
+});
+
+// Giriş başarılıysa gelen role göre ana pencere açılır
+ipcRenderer.on('login-success', (event, role) => {
+    console.log("✅ Giriş başarılı, rol:", role);
+    // Giriş başarılıysa bu pencere main.js tarafından zaten kapatılıyor
+});
+
+// Giriş başarısızsa uyarı göster
+ipcRenderer.on('login-failed', () => {
+    showError("Geçersiz e-posta veya şifre.");
+});
+
+// Uyarı kutusunu göster
+function showError(message) {
+    const errorDiv = document.getElementById('error');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+}

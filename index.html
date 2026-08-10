@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Üye Kayıt Sistemi</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            color: #212529;
+        }
+
+        #headerBar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            padding: 10px 30px;
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        #editableTitle {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0 auto;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .form-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            flex: 1 1 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 4px;
+            font-weight: 500;
+            text-align: left;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #0d6efd;
+            box-shadow: 0 0 3px rgba(13, 110, 253, 0.5);
+        }
+
+        button {
+            margin: 6px;
+            padding: 10px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0b5ed7;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        th {
+            background-color: #e9ecef;
+            font-weight: 600;
+        }
+
+        th,
+        td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: 0.3s ease;
+        }
+
+        .profile-img:hover {
+            transform: scale(2);
+            z-index: 99;
+        }
+
+        .remove-button {
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        h2 {
+            margin-top: 40px;
+            font-size: 20px;
+        }
+
+        #aidatFilter {
+            transform: scale(1.3);
+            margin-left: 5px;
+        }
+
+        #search {
+            margin: 10px 0;
+            padding: 8px;
+            width: 200px;
+        }
+
+        .detay-row {
+            background-color: #f1f1f1;
+            font-size: 14px;
+        }
+
+        .detay-row td {
+            padding: 10px 15px;
+            border-top: none;
+        }
+
+
+        #footer {
+            text-align: center;
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 40px;
+            padding: 10px 0;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id="headerBar">
+        <img src="images/turkbayragi.png" alt="Türk Bayrağı" style="height: 80px;">
+        <h1 id="editableTitle" contenteditable="true" onblur="saveTitle()">Mersin ODTÜ Mezunlar Üye Kayıt Sistemi</h1>
+        <img src="images/logo.jpg" alt="Logo" style="height: 80px;">
+    </div>
+
+    <input type="hidden" id="editingRowIndex">
+
+    <div class="form-wrapper">
+
+        <div class="form-group">
+            <label for="name">Ad Soyad:</label>
+            <input type="text" id="name" placeholder="Ad Soyad">
+        </div>
+
+        <div class="form-group">
+            <label for="email">Mail Adresi:</label>
+            <input type="email" id="email" placeholder="ornek@mail.com">
+        </div>
+
+        <div class="form-group">
+            <label for="telefon">Telefon Numarası:</label>
+            <input type="tel" id="telefon" placeholder="05xxxxxxxxx">
+        </div>
+
+        <div class="form-group">
+            <label for="department">Bölüm:</label>
+            <select id="department" onchange="checkCustomDepartment()"></select>
+            <input type="text" id="customDepartment" placeholder="Bölüm giriniz..." style="display: none;">
+        </div>
+
+        <div class="form-group">
+            <label for="graduation">Mezuniyet Yılı:</label>
+            <input type="text" id="graduation" placeholder="2022">
+        </div>
+
+        <div class="form-group">
+            <label for="isyeri">Çalıştığı Kurum:</label>
+            <input type="text" id="isyeri" placeholder="İşyeri adı">
+        </div>
+
+        <div class="form-group">
+            <label for="meslek">Mesleği:</label>
+            <input type="text" id="meslek" placeholder="Meslek">
+        </div>
+
+        <div class="form-group">
+            <label for="pozisyon">Pozisyon:</label>
+            <input type="text" id="pozisyon" placeholder="Pozisyon">
+        </div>
+
+        <div class="form-group">
+            <label for="sehir">Yaşadığı Şehir:</label>
+            <input type="text" id="sehir" placeholder="Şehir">
+        </div>
+
+        <div class="form-group">
+            <label for="uyelikGiris">Üyelik Giriş Tarihi:</label>
+            <input type="date" id="uyelikGiris">
+        </div>
+
+        <div class="form-group">
+            <label for="uyelikCikis">Üyelik Çıkış Tarihi:</label>
+            <input type="date" id="uyelikCikis">
+        </div>
+
+    </div>
+
+    <div class="form-wrapper">
+        <div class="form-group">
+            <label for="aidatDonemiSelect">Aidat Dönemi Seç:</label>
+            <select id="aidatDonemiSelect">
+                <option value="2024-2025">2024-2025</option>
+                <option value="2023-2024">2023-2024</option>
+                <option value="2022-2023">2022-2023</option>
+                <option value="2021-2022">2021-2022</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="aidatOdendiCheck">Ödendi mi?</label>
+            <input type="checkbox" id="aidatOdendiCheck">
+        </div>
+
+        <button type="button" onclick="addAidatToList()">Listeye Ekle</button>
+    </div>
+
+    <table class="aidat-mini-table" id="aidatTable">
+        <thead>
+            <tr>
+                <th>Dönem</th>
+                <th>Ödendi mi?</th>
+                <th>Sil</th>
+            </tr>
+        </thead>
+        <tbody id="aidatTableBody"></tbody>
+    </table>
+
+    <div class="form-wrapper">
+        <div class="form-group">
+            <label for="bursMiktar">Burs Miktarı:</label>
+            <input type="number" id="bursMiktar" placeholder="Burs Miktarı (₺)">
+        </div>
+
+        <div class="form-group">
+            <label for="bursTip">Burs Türü:</label>
+            <select id="bursTip">
+                <option value="Aylık">Aylık</option>
+                <option value="Yıllık">Yıllık</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="photoUpload">Fotoğraf Yükle:</label>
+            <input type="file" id="photoUpload">
+        </div>
+    </div>
+
+    <button onclick="saveMember()" id="saveButton">Kaydet</button>
+    <button onclick="updateMember()" id="updateButton" style="display:none;">Güncelle</button>
+
+    <h2>Kayıtlı Üyeler</h2>
+
+    <label for="search">Üye Ara:</label>
+    <input type="text" id="search" placeholder="Arama yap..." onkeyup="filterMembers()">
+
+    <div style="margin-top: 30px;">
+        <h3>Aidat Dönemi Filtrele</h3>
+        <label for="donemFiltre">Dönem:</label>
+        <select id="donemFiltre">
+            <option value="">Tümü</option>
+            <option value="2021-2022">2021-2022</option>
+            <option value="2022-2023">2022-2023</option>
+            <option value="2023-2024">2023-2024</option>
+            <option value="2024-2025">2024-2025</option>
+        </select>
+
+        <label for="odemeFiltre">Ödeme Durumu:</label>
+        <select id="odemeFiltre">
+            <option value="">Tümü</option>
+            <option value="1">Ödedi</option>
+            <option value="0">Ödemedi</option>
+        </select>
+
+        <button onclick="filterByDonem()">Filtrele</button>
+        <button onclick="clearFilter()">Filtreyi Temizle</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Fotoğraf</th>
+                <th>Ad Soyad</th>
+                <th>Bölüm</th>
+                <th>Mezuniyet Yılı</th>
+                <th>Aidat Dönemi</th>
+                <th>Aidat Durumu</th>
+                <th>Burs</th>
+                <th>Detaylar</th>
+                <th>Düzenle</th>
+                <th>Sil</th>
+            </tr>
+        </thead>
+        <tbody id="memberTable"></tbody>
+    </table>
+
+    <footer id="footer">
+        Telif Hakkı © 2025 Ünsal Okuducu & Mehmet Can Sabancı. Tüm Hakları Saklıdır.
+    </footer>
+
+    <input type="hidden" id="editingPhoto">
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        const { remote } = require('electron');
+        const path = require('path');
+
+        let photoBasePath = "";
+        ipcRenderer.send("get-photo-path");
+        ipcRenderer.on("photo-path", (event, path) => {
+            photoBasePath = path;
+        });
+
+
+        ipcRenderer.on("show-backup-message", () => {
+            const msg = document.getElementById("backupMessage");
+            if (msg) msg.style.display = "block";
+        });
+
+        ipcRenderer.on("hide-backup-message", () => {
+            const msg = document.getElementById("backupMessage");
+            if (msg) msg.style.display = "none";
+        });
+
+
+        // Başlık localStorage'tan alınıyor
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTitle = localStorage.getItem('uygulamaBasligi');
+            if (savedTitle) {
+                document.getElementById('editableTitle').innerText = savedTitle;
+            }
+        });
+
+        function saveTitle() {
+            const newTitle = document.getElementById('editableTitle').innerText.trim();
+            if (newTitle) {
+                localStorage.setItem('uygulamaBasligi', newTitle);
+            }
+        }
+
+        fetch('departments.json')
+            .then(response => response.json())
+            .then(departments => {
+                const select = document.getElementById('department');
+                Object.keys(departments).forEach(fakulte => {
+                    departments[fakulte].forEach(department => {
+                        const option = document.createElement('option');
+                        option.value = department;
+                        option.textContent = department;
+                        select.appendChild(option);
+                    });
+                });
+
+                const otherOption = document.createElement('option');
+                otherOption.value = "custom";
+                otherOption.textContent = "Diğer (Manuel Giriş)";
+                select.appendChild(otherOption);
+            })
+            .catch(error => console.error("Bölümler yüklenirken hata oluştu:", error));
+
+        function checkCustomDepartment() {
+            const departmentSelect = document.getElementById("department");
+            const customInput = document.getElementById("customDepartment");
+
+            if (departmentSelect.value === "custom") {
+                customInput.style.display = "inline-block";
+            } else {
+                customInput.style.display = "none";
+            }
+        }
+
+        // Mini tabloya aidat dönemi ekleme
+        function addAidatToList() {
+            const donemSelect = document.getElementById('aidatDonemiSelect');
+            const odendiCheckbox = document.getElementById('aidatOdendiCheck');
+            const aidatTableBody = document.getElementById('aidatTableBody');
+
+            const selectedDonem = donemSelect.value;
+            const isPaid = odendiCheckbox.checked;
+
+            // Aynı dönem daha önce eklendiyse tekrar eklenmesin
+            const existing = Array.from(aidatTableBody.querySelectorAll('tr')).some(row => {
+                return row.dataset.donem === selectedDonem;
+            });
+
+            if (existing) {
+                alert("Bu dönem zaten eklenmiş!");
+                return;
+            }
+
+            const row = document.createElement('tr');
+            row.dataset.donem = selectedDonem;
+
+            const donemCell = document.createElement('td');
+            donemCell.textContent = selectedDonem;
+
+            const odendiCell = document.createElement('td');
+            const odendiInput = document.createElement('input');
+            odendiInput.type = 'checkbox';
+            odendiInput.checked = isPaid;
+            odendiCell.appendChild(odendiInput);
+
+            const removeCell = document.createElement('td');
+            const removeBtn = document.createElement('span');
+            removeBtn.textContent = "🗑️";
+            removeBtn.className = "remove-button";
+            removeBtn.onclick = () => row.remove();
+            removeCell.appendChild(removeBtn);
+
+            row.appendChild(donemCell);
+            row.appendChild(odendiCell);
+            row.appendChild(removeCell);
+
+            aidatTableBody.appendChild(row);
+        }
+
+        // Kaydetme işlemi
+        function saveMember() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const telefon = document.getElementById('telefon').value.trim();
+            const isyeri = document.getElementById('isyeri').value.trim();
+            const meslek = document.getElementById('meslek').value.trim();
+            const pozisyon = document.getElementById('pozisyon').value.trim();
+            const sehir = document.getElementById('sehir').value.trim();
+            const uyelikGiris = document.getElementById('uyelikGiris').value;
+            const uyelikCikis = document.getElementById('uyelikCikis').value;
+
+            const departmentSelect = document.getElementById('department').value;
+            const customDepartment = document.getElementById('customDepartment').value.trim();
+            const department = departmentSelect === "custom" ? customDepartment : departmentSelect;
+
+            const graduation = document.getElementById('graduation').value.trim();
+            const bursMiktar = parseInt(document.getElementById('bursMiktar').value) || 0;
+            const bursTip = document.getElementById('bursTip').value;
+            const photoInput = document.getElementById('photoUpload');
+            const photoFile = photoInput.files.length > 0 ? photoInput.files[0] : null;
+
+            // Aidat verilerini topla
+            const aidatTableRows = document.querySelectorAll('#aidatTableBody tr');
+            const aidatList = Array.from(aidatTableRows).map(row => {
+                return {
+                    donem: row.dataset.donem,
+                    odendi: row.querySelector('input[type="checkbox"]').checked ? 1 : 0
+                };
+            });
+
+            if (aidatList.length === 0) {
+                alert("Lütfen en az bir aidat dönemi ekleyin!");
+                return;
+            }
+
+            // Fotoğraflı veya fotosuz gönderim
+            if (photoFile) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const member = {
+                        adsoyad: name,
+                        bolum: department,
+                        mezuniyet: graduation,
+                        bursMiktar,
+                        bursTip,
+                        photo: reader.result,
+                        aidatlar: aidatList,
+                        email,
+                        telefon,
+                        isyeri,
+                        meslek,
+                        pozisyon,
+                        sehir,
+                        uyelikGiris,
+                        uyelikCikis
+                    };
+                    ipcRenderer.send('add-member', member);
+                    resetForm();
+                };
+                reader.readAsDataURL(photoFile);
+            } else {
+                const member = {
+                    adsoyad: name,
+                    bolum: department,
+                    mezuniyet: graduation,
+                    bursMiktar,
+                    bursTip,
+                    photo: null,
+                    aidatlar: aidatList,
+                    email,
+                    telefon,
+                    isyeri,
+                    meslek,
+                    pozisyon,
+                    sehir,
+                    uyelikGiris,
+                    uyelikCikis
+                };
+                ipcRenderer.send('add-member', member);
+                resetForm();
+            }
+        }
+
+
+        function resetForm() {
+            document.getElementById('name').value = "";
+            document.getElementById('graduation').value = "";
+            document.getElementById('bursMiktar').value = "";
+            document.getElementById('bursTip').value = "Aylık";
+            document.getElementById('photoUpload').value = "";
+            document.getElementById('editingRowIndex').value = "";
+            document.getElementById('department').value = "";
+            document.getElementById('customDepartment').value = "";
+            document.getElementById('customDepartment').style.display = "none";
+            document.getElementById('aidatTableBody').innerHTML = "";
+            document.getElementById('saveButton').style.display = "inline-block";
+            document.getElementById('updateButton').style.display = "none";
+        }
+
+        // Kayıtlı üyeleri tabloya ekleme (aidatlar veritabanından çekildiğinde ayrı işlenecek)
+        function addMemberToTable(member) {
+            const table = document.getElementById("memberTable");
+
+            const row = table.insertRow();
+            row.setAttribute("data-id", member.id);
+            row.classList.add("main-row");
+
+            const imgCell = row.insertCell(0);
+            if (member.photo) {
+                const img = document.createElement("img");
+                img.src = member.photo;
+                img.classList.add("profile-img");
+                img.onerror = () => { imgCell.textContent = "📷"; };
+                imgCell.appendChild(img);
+            } else {
+                imgCell.textContent = "📷";
+            }
+
+
+
+
+
+            row.insertCell(1).textContent = member.adsoyad;
+            row.insertCell(2).textContent = member.bolum;
+            row.insertCell(3).textContent = member.mezuniyet;
+
+            const donemCell = row.insertCell(4);
+            const select = document.createElement("select");
+
+            member.donemler.forEach((donem, index) => {
+                const option = document.createElement("option");
+                option.value = index;
+                option.textContent = donem;
+                select.appendChild(option);
+            });
+            donemCell.appendChild(select);
+
+            const odendiCell = row.insertCell(5);
+            const statusSpan = document.createElement("span");
+
+            function updateStatus(index) {
+                const odendi = member.donemler_odendi[index];
+                statusSpan.innerHTML = odendi === "✅" ? "✅" : "❌";
+            }
+
+            updateStatus(0);
+            select.addEventListener("change", (e) => updateStatus(e.target.value));
+            odendiCell.appendChild(statusSpan);
+
+            row.insertCell(6).textContent = `${member.bursMiktar} ₺ (${member.bursTip})`;
+
+            const toggleCell = row.insertCell(7);
+            const toggleBtn = document.createElement("button");
+            toggleBtn.textContent = "Detaylar";
+            toggleBtn.onclick = () => {
+                detayRow.style.display = detayRow.style.display === "none" ? "table-row" : "none";
+            };
+            toggleCell.appendChild(toggleBtn);
+
+            const editBtn = document.createElement("span");
+            editBtn.innerHTML = "<i class='fas fa-edit'></i>";
+            editBtn.style.cursor = "pointer";
+            editBtn.onclick = function () {
+                editMember(member);
+            };
+            row.insertCell(8).appendChild(editBtn);
+
+            const deleteBtn = document.createElement("span");
+            deleteBtn.innerHTML = "<i class='fas fa-trash'></i>";
+            deleteBtn.style.cursor = "pointer";
+            deleteBtn.onclick = function () {
+                ipcRenderer.send("delete-member", member.id);
+                row.remove();
+                detayRow.remove();
+            };
+            row.insertCell(9).appendChild(deleteBtn);
+
+            // ➤ Detay Satırı
+            const detayRow = table.insertRow();
+            detayRow.classList.add("detay-row");
+            detayRow.style.display = "none";
+
+            const detayCell = detayRow.insertCell(0);
+            detayCell.colSpan = 10;
+            detayCell.innerHTML = `
+        <div style="text-align: left; padding: 10px;">
+            <strong>📧 Mail:</strong> ${member.email || "-"}<br>
+            <strong>📱 Telefon:</strong> ${member.telefon || "-"}<br>
+            <strong>🏢 İş Yeri:</strong> ${member.isyeri || "-"}<br>
+            <strong>👨‍🔧 Meslek:</strong> ${member.meslek || "-"}<br>
+            <strong>👔 Pozisyon:</strong> ${member.pozisyon || "-"}<br>
+            <strong>🌍 Şehir:</strong> ${member.sehir || "-"}<br>
+            <strong>📅 Üyelik Tarihleri:</strong> ${member.uyelikGiris || "-"} / ${member.uyelikCikis || "-"}
+        </div>
+    `;
+        }
+
+        // Üyeler yüklendiğinde tüm listeyi temizleyip yeniden doldur
+        ipcRenderer.send('load-members');
+        ipcRenderer.on('members-loaded', (event, members) => {
+            document.getElementById("memberTable").innerHTML = "";
+            members.forEach(member => addMemberToTable(member));
+        });
+
+        ipcRenderer.on('member-added', (event, member) => {
+            ipcRenderer.send('load-members');
+        });
+
+        function filterMembers() {
+            const searchValue = document.getElementById("search").value.toLowerCase();
+            const rows = document.querySelectorAll("#memberTable .main-row");
+
+            rows.forEach(mainRow => {
+                const detayRow = mainRow.nextElementSibling;
+
+                // Verileri al
+                const name = mainRow.cells[1]?.textContent.toLowerCase() || "";
+                const department = mainRow.cells[2]?.textContent.toLowerCase() || "";
+
+                const matches = name.includes(searchValue) || department.includes(searchValue);
+
+                // Eşleşiyorsa göster, değilse gizle
+                mainRow.style.display = matches ? "" : "none";
+
+                // Detay satırı varsa her zaman gizle
+                if (detayRow && detayRow.classList.contains("detay-row")) {
+                    detayRow.style.display = "none";
+                }
+            });
+        }
+
+
+
+
+
+        /*    function filterAidatOdendi() {
+                const isChecked = document.getElementById("aidatFilter").checked;
+                const rows = document.querySelectorAll("#memberTable tr");
+    
+                rows.forEach(row => {
+                    const cellContent = row.cells[5].innerText;
+                    const hasPaid = cellContent.includes("✅");
+                    if (isChecked && !hasPaid) {
+                        row.style.display = "none";
+                    } else {
+                        row.style.display = "";
+                    }
+                });
+            }
+          */
+
+        function updateMember() {
+            const id = document.getElementById('editingRowIndex').value;
+            if (!id) return;
+
+            const name = document.getElementById('name').value.trim();
+            const departmentSelect = document.getElementById('department').value;
+            const customDepartment = document.getElementById('customDepartment').value.trim();
+            const department = departmentSelect === "custom" ? customDepartment : departmentSelect;
+            const graduation = document.getElementById('graduation').value.trim();
+            const bursMiktar = parseInt(document.getElementById('bursMiktar').value) || 0;
+            const bursTip = document.getElementById('bursTip').value;
+            const photoInput = document.getElementById('photoUpload');
+            const photoFile = photoInput.files.length > 0 ? photoInput.files[0] : null;
+
+            const email = document.getElementById('email').value.trim();
+            const telefon = document.getElementById('telefon').value.trim();
+            const isyeri = document.getElementById('isyeri').value.trim();
+            const meslek = document.getElementById('meslek').value.trim();
+            const pozisyon = document.getElementById('pozisyon').value.trim();
+            const sehir = document.getElementById('sehir').value.trim();
+            const uyelikGiris = document.getElementById('uyelikGiris').value;
+            const uyelikCikis = document.getElementById('uyelikCikis').value;
+
+            // Aidat bilgilerini topla
+            const aidatTableRows = document.querySelectorAll('#aidatTableBody tr');
+            const aidatList = Array.from(aidatTableRows).map(row => {
+                return {
+                    donem: row.dataset.donem,
+                    odendi: row.querySelector('input[type="checkbox"]').checked ? 1 : 0
+                };
+            });
+
+            if (aidatList.length === 0) {
+                alert("Lütfen en az bir aidat dönemi ekleyin!");
+                return;
+            }
+
+            const memberBase = {
+                id,
+                adsoyad: name,
+                bolum: department,
+                mezuniyet: graduation,
+                bursMiktar,
+                bursTip,
+                aidatlar: aidatList,
+                email,
+                telefon,
+                isyeri,
+                meslek,
+                pozisyon,
+                sehir,
+                uyelikGiris,
+                uyelikCikis
+            };
+
+            const existingPhoto = document.getElementById('editingPhoto').value;
+
+            if (photoFile) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const member = {
+                        ...memberBase,
+                        photo: reader.result
+                    };
+                    ipcRenderer.send('update-member', member);
+                    resetForm();
+                };
+                reader.readAsDataURL(photoFile);
+            } else {
+                const member = {
+                    ...memberBase,
+                    photo: existingPhoto
+                };
+                ipcRenderer.send('update-member', member);
+                resetForm();
+            }
+        }
+
+        function editMember(member) {
+            // Temel alanlar
+            document.getElementById('name').value = member.adsoyad || "";
+            document.getElementById('graduation').value = member.mezuniyet || "";
+            document.getElementById('bursMiktar').value = member.bursMiktar || "";
+            document.getElementById('bursTip').value = member.bursTip || "Aylık";
+            document.getElementById('editingRowIndex').value = member.id;
+
+            // Ek bilgiler
+            document.getElementById('email').value = member.email || "";
+            document.getElementById('telefon').value = member.telefon || "";
+            document.getElementById('isyeri').value = member.isyeri || "";
+            document.getElementById('meslek').value = member.meslek || "";
+            document.getElementById('pozisyon').value = member.pozisyon || "";
+            document.getElementById('sehir').value = member.sehir || "";
+            document.getElementById('uyelikGiris').value = member.uyelikGiris || "";
+            document.getElementById('uyelikCikis').value = member.uyelikCikis || "";
+
+            // Bölüm seçimi
+            const departmentSelect = document.getElementById("department");
+            const customInput = document.getElementById("customDepartment");
+
+            if ([...departmentSelect.options].some(opt => opt.value === member.bolum)) {
+                departmentSelect.value = member.bolum;
+                customInput.style.display = "none";
+                customInput.value = "";
+            } else {
+                departmentSelect.value = "custom";
+                customInput.style.display = "inline-block";
+                customInput.value = member.bolum || "";
+            }
+
+            // Aidat tablosunu doldur
+            const aidatBody = document.getElementById("aidatTableBody");
+            aidatBody.innerHTML = "";
+            if (member.aidatlar && Array.isArray(member.aidatlar)) {
+                member.aidatlar.forEach(a => {
+                    const row = document.createElement('tr');
+                    row.dataset.donem = a.donem;
+
+                    const donemCell = document.createElement('td');
+                    donemCell.textContent = a.donem;
+
+                    const odendiCell = document.createElement('td');
+                    const odendiInput = document.createElement('input');
+                    odendiInput.type = 'checkbox';
+                    odendiInput.checked = a.odendi == 1;
+                    odendiCell.appendChild(odendiInput);
+
+                    const removeCell = document.createElement('td');
+                    const removeBtn = document.createElement('span');
+                    removeBtn.textContent = "🗑️";
+                    removeBtn.className = "remove-button";
+                    removeBtn.onclick = () => row.remove();
+                    removeCell.appendChild(removeBtn);
+
+                    row.appendChild(donemCell);
+                    row.appendChild(odendiCell);
+                    row.appendChild(removeCell);
+
+                    aidatBody.appendChild(row);
+                });
+            }
+
+            document.getElementById('editingPhoto').value = member.photo || "";
+
+            // Butonları ayarla
+            document.getElementById('saveButton').style.display = "none";
+            document.getElementById('updateButton').style.display = "inline-block";
+        }
+
+        ipcRenderer.on('member-updated', (event, updatedMember) => {
+            const row = document.querySelector(`tr[data-id='${updatedMember.id}']`);
+            if (row) {
+                const detayRow = row.nextElementSibling;
+                row.remove();
+                if (detayRow && detayRow.classList.contains('detay-row')) {
+                    detayRow.remove();
+                }
+            }
+
+            addMemberToTable(updatedMember);
+            resetForm();
+        });
+
+
+
+        function filterByDonem() {
+            const secilenDonem = document.getElementById('donemFiltre').value;
+            const odemeDurumu = document.getElementById('odemeFiltre').value;
+            const rows = document.querySelectorAll('#memberTable tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+
+                // Sadece main-row üzerinde işlem yap
+                if (!row.classList.contains("main-row")) continue;
+
+                const detayRow = rows[i + 1]; // hemen ardından gelen detay satırı
+                const donemSelect = row.cells[4].querySelector('select');
+                const statusSpan = row.cells[5].querySelector('span');
+
+                let display = true;
+
+                if (secilenDonem) {
+                    const options = Array.from(donemSelect.options);
+                    const matchIndex = options.findIndex(opt => opt.textContent === secilenDonem);
+
+                    if (matchIndex !== -1) {
+                        donemSelect.selectedIndex = matchIndex;
+                        donemSelect.dispatchEvent(new Event('change'));
+                    } else {
+                        display = false;
+                    }
+                }
+
+                const odendiGorunen = statusSpan.textContent;
+                if (odemeDurumu === "1" && odendiGorunen !== "✅") {
+                    display = false;
+                } else if (odemeDurumu === "0" && odendiGorunen !== "❌") {
+                    display = false;
+                }
+
+                // Hem main satırı hem detay satırı birlikte görünür/gizlenir
+                row.style.display = display ? "" : "none";
+                if (detayRow && detayRow.classList.contains("detay-row")) {
+                    detayRow.style.display = display ? "none" : "none"; // detaylar varsayılan kapalı olsun
+                }
+            }
+        }
+
+
+        function clearFilter() {
+            document.getElementById('donemFiltre').value = "";
+            document.getElementById('odemeFiltre').value = "";
+
+            const rows = document.querySelectorAll('#memberTable .main-row');
+            rows.forEach(row => {
+                row.style.display = "";
+
+                const detayRow = row.nextElementSibling;
+                if (detayRow && detayRow.classList.contains('detay-row')) {
+                    detayRow.style.display = "none";
+                }
+
+                const select = row.querySelector('select');
+                if (select) {
+                    select.selectedIndex = 0;
+                    select.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+
+        // 👇 Kullanıcı rolüne göre yetkilendirme
+        let currentUserRole = "viewer";  // varsayılan olarak viewer (güvenlik amaçlı)
+
+        // Ana işlem: gelen rol bilgisiyle UI yetkilerini belirle
+        ipcRenderer.on('set-role', (event, role) => {
+            currentUserRole = role;
+            applyRolePermissions();
+        });
+
+        // Yetkileri düzenleyen fonksiyon
+        function applyRolePermissions() {
+            if (currentUserRole === "viewer") {
+                document.getElementById('saveButton').style.display = 'none';
+                document.getElementById('updateButton').style.display = 'none';
+
+                document.querySelectorAll('.fa-edit, .fa-trash, button').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+
+                document.querySelectorAll('input, select, textarea').forEach(input => {
+                    input.disabled = true;
+                });
+
+            } else if (currentUserRole === "admin") {
+                document.getElementById('saveButton').style.display = 'inline-block';
+
+                document.querySelectorAll('.fa-edit, .fa-trash, button').forEach(btn => {
+                    btn.style.display = '';
+                });
+
+                document.querySelectorAll('input, select, textarea').forEach(input => {
+                    input.disabled = false;
+                });
+            }
+        }
+
+        // üyeler yüklendikten sonra tekrar yetkilendirme fonksiyonunu çalıştır.
+        ipcRenderer.on('members-loaded', (event, members) => {
+            document.getElementById("memberTable").innerHTML = "";
+            members.forEach(member => addMemberToTable(member));
+
+            applyRolePermissions();
+        });
+
+        // Üye güncellendiğinde yetki fonksiyonunu tekrar çağır
+        ipcRenderer.on('member-updated', (event, updatedMember) => {
+            const row = document.querySelector(`tr[data-id='${updatedMember.id}']`);
+            if (row) {
+                const detayRow = row.nextElementSibling;
+                row.remove();
+                if (detayRow && detayRow.classList.contains('detay-row')) {
+                    detayRow.remove();
+                }
+            }
+
+            addMemberToTable(updatedMember);
+            resetForm();
+
+            applyRolePermissions();
+        });
+
+
+
+    </script>
+
+    <div id="backupMessage" style="display:none; text-align:center; padding:10px; font-weight:bold; color:#2f855a;">
+        💾 Veriler yedekleniyor, lütfen bekleyin...
+    </div>
+
+
+</body>
+
+
+
+
+</html>

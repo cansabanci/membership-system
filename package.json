@@ -1,0 +1,60 @@
+{
+  "name": "odtu_uyekayit",
+  "version": "1.0.0",
+  "description": "Mersin ODTÜ Mezunları Üye Kayıt Sistemi",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.mersinodtu.uyekayit",
+    "productName": "ODTU_UyeKayit",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*"
+    ],
+    "asar": false,
+    "extraResources": [
+      {
+        "from": "google",
+        "to": "google"
+      },
+      {
+        "from": "export",
+        "to": "export"
+      },
+      {
+        "from": ".env",
+        "to": ".env"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^35.0.3",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "exceljs": "^4.4.0",
+    "google-auth-library": "^9.15.1",
+    "googleapis": "^148.0.0",
+    "mssql": "^11.0.1",
+    "mysql2": "^3.14.0"
+  }
+}
