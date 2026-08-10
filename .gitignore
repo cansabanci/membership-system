@@ -5,3 +5,4 @@ dist/
 export/*.xlsx
 photos/
 resources/google/credentials.json
+.claude/
