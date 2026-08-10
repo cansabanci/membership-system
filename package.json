@@ -14,7 +14,16 @@
       "output": "dist"
     },
     "files": [
-      "**/*"
+      "**/*",
+      "!.git",
+      "!.claude",
+      "!dist",
+      "!export/**/*",
+      "!.env",
+      "!.env.example",
+      "!.gitignore",
+      "!resources/**/*",
+      "!*.md"
     ],
     "asar": false,
     "extraResources": [
