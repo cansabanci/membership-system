@@ -48,14 +48,43 @@ window.addEventListener('DOMContentLoaded', () => {
     const graduationInput = document.getElementById('graduation');
     graduationInput.min = MIN_YEAR;
     graduationInput.max = CURRENT_YEAR;
+    graduationInput.addEventListener('input', () => {
+        if (graduationInput.value.length > 4) {
+            graduationInput.value = graduationInput.value.slice(0, 4);
+        }
+    });
 
     const maxMembershipDate = `${CURRENT_YEAR + 5}-12-31`;
     ['uyelikGiris', 'uyelikCikis'].forEach((id) => {
         const input = document.getElementById(id);
         input.min = '1950-01-01';
         input.max = maxMembershipDate;
+        enforceDateBounds(input);
     });
 });
+
+// Tarih alanının yıl segmentine sınırsız rakam yazılmasını (ör. "20000000") engelle.
+// Not: Chromium bu taşma durumunda ne 'input' ne 'change' ne 'blur' olayını tetikliyor
+// (odak kaybedince sessizce kendi kendine temizliyor) — bu yüzden olay dinlemek yerine,
+// alan odaktayken kısa aralıklarla input.validity.badInput'u kontrol ediyoruz.
+function enforceDateBounds(input) {
+    let watcher = null;
+
+    const check = () => {
+        if (input.validity.badInput || input.validity.rangeOverflow || input.validity.rangeUnderflow) {
+            input.value = '';
+            showErrorBanner(`Geçersiz tarih girişi temizlendi. Yıl ${input.min.slice(0, 4)} ile ${input.max.slice(0, 4)} arasında olmalı.`);
+        }
+    };
+
+    input.addEventListener('focus', () => {
+        watcher = setInterval(check, 250);
+    });
+    input.addEventListener('blur', () => {
+        clearInterval(watcher);
+        check();
+    });
+}
 
 function saveTitle() {
     const newTitle = document.getElementById('editableTitle').innerText.trim();
