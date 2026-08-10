@@ -11,14 +11,14 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
         return;
     }
 
-    // Giriş bilgilerini main.js'e gönder
+    // Giriş bilgilerini main sürece gönder
     ipcRenderer.send('login-attempt', { email, password });
 });
 
 // Giriş başarılıysa gelen role göre ana pencere açılır
 ipcRenderer.on('login-success', (event, role) => {
     console.log("✅ Giriş başarılı, rol:", role);
-    // Giriş başarılıysa bu pencere main.js tarafından zaten kapatılıyor
+    // Giriş başarılıysa bu pencere main süreç tarafından zaten kapatılıyor
 });
 
 // Giriş başarısızsa uyarı göster

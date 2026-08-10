@@ -2,7 +2,7 @@
   "name": "odtu_uyekayit",
   "version": "1.0.0",
   "description": "Mersin ODTÜ Mezunları Üye Kayıt Sistemi",
-  "main": "main.js",
+  "main": "src/main/index.js",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder"
@@ -19,8 +19,8 @@
     "asar": false,
     "extraResources": [
       {
-        "from": "google",
-        "to": "google"
+        "from": "resources",
+        "to": "resources"
       },
       {
         "from": "export",
@@ -50,11 +50,11 @@
     "electron-builder": "^26.0.12"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.3.1",
     "dotenv": "^16.4.7",
     "exceljs": "^4.4.0",
     "google-auth-library": "^9.15.1",
     "googleapis": "^148.0.0",
-    "mssql": "^11.0.1",
-    "mysql2": "^3.14.0"
+    "mssql": "^11.0.1"
   }
 }
