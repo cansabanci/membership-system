@@ -64,25 +64,16 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // Tarih alanının yıl segmentine sınırsız rakam yazılmasını (ör. "20000000") engelle.
-// Not: Chromium bu taşma durumunda ne 'input' ne 'change' ne 'blur' olayını tetikliyor
-// (odak kaybedince sessizce kendi kendine temizliyor) — bu yüzden olay dinlemek yerine,
-// alan odaktayken kısa aralıklarla input.validity.badInput'u kontrol ediyoruz.
+// Not: Chromium tek haneli/eksik girişte bile anlık olarak badInput=true verebiliyor
+// (bir sonraki hane yazılınca kendiliğinden düzeliyor) — bu yüzden her yazışta değil,
+// sadece kullanıcı alandan çıktığında (blur) kontrol ediyoruz. Böylece hem normal
+// yazmayı engellemiyoruz hem de taşan/geçersiz bir değer alanda kalıcı olamıyor.
 function enforceDateBounds(input) {
-    let watcher = null;
-
-    const check = () => {
+    input.addEventListener('blur', () => {
         if (input.validity.badInput || input.validity.rangeOverflow || input.validity.rangeUnderflow) {
             input.value = '';
             showErrorBanner(`Geçersiz tarih girişi temizlendi. Yıl ${input.min.slice(0, 4)} ile ${input.max.slice(0, 4)} arasında olmalı.`);
         }
-    };
-
-    input.addEventListener('focus', () => {
-        watcher = setInterval(check, 250);
-    });
-    input.addEventListener('blur', () => {
-        clearInterval(watcher);
-        check();
     });
 }
 
