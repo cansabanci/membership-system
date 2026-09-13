@@ -833,3 +833,113 @@ table.data-table {
     color: var(--ink-soft);
     cursor: pointer;
 }
+
+/* ---------- Telefon/tablet ekranlari ---------- */
+.table-scroll {
+    -webkit-overflow-scrolling: touch;
+}
+
+table.data-table {
+    min-width: 760px;
+}
+
+@media (max-width: 720px) {
+    .content {
+        padding: 0 12px;
+        gap: 16px;
+    }
+
+    .panel {
+        padding: 18px 16px 20px;
+    }
+
+    .panel-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .topbar {
+        flex-wrap: wrap;
+        padding: 12px 16px;
+        gap: 10px;
+    }
+
+    .topbar-brand {
+        gap: 10px;
+    }
+
+    .brand-logo {
+        height: 40px;
+        width: 40px;
+    }
+
+    .brand-flag {
+        height: 30px;
+        width: 30px;
+    }
+
+    #editableTitle {
+        font-size: 16px;
+    }
+
+    .eyebrow {
+        font-size: 10px;
+    }
+
+    .search-box {
+        max-width: none;
+        flex-basis: 100%;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    /* Viewer profil karti: foto ustte ortali, bilgiler altta tam genislikte */
+    .profile-card-photo-col {
+        width: 100%;
+        max-width: 240px;
+        margin: 0 auto;
+    }
+
+    .profile-card-info {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .profile-card-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+
+    .profile-card-label {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .field-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .panel-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .panel-actions button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .aidat-picker {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .aidat-picker .check-field {
+        padding-bottom: 0;
+    }
+}
