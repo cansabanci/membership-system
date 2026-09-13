@@ -5,7 +5,9 @@
   "main": "src/main/index.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "server": "node server/index.js",
+    "server:verify": "node server/scripts/verifyApi.js"
   },
   "build": {
     "appId": "com.mersinodtu.uyekayit",
@@ -24,7 +26,8 @@
       "!.env.example",
       "!.gitignore",
       "!resources/**/*",
-      "!*.md"
+      "!*.md",
+      "!server/**/*"
     ],
     "asar": false,
     "extraResources": [
@@ -62,10 +65,16 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.3.1",
     "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "csrf-csrf": "^4.0.3",
     "dotenv": "^16.4.7",
     "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
     "google-auth-library": "^9.15.1",
     "googleapis": "^148.0.0",
+    "helmet": "^8.3.0",
     "mssql": "^11.0.1"
   }
 }

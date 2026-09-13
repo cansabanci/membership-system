@@ -12,6 +12,8 @@ const dbConfig = {
   options: {
     trustServerCertificate: true,
     enableArithAbort: true,
+    // Turhost TLS destegi netlesene kadar false — DB_ENCRYPT=true ile acilabilir.
+    encrypt: process.env.DB_ENCRYPT === 'true',
   },
 };
 

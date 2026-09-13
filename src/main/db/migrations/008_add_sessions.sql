@@ -1,0 +1,7 @@
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'oturumlar')
+CREATE TABLE oturumlar (
+  sid NVARCHAR(255) NOT NULL PRIMARY KEY,
+  data NVARCHAR(MAX) NOT NULL,
+  expires DATETIME NOT NULL
+)
+GO

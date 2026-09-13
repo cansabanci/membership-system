@@ -6,3 +6,4 @@ export/*.xlsx
 photos/
 resources/google/credentials.json
 .claude/
+server/uploads/
