@@ -12,11 +12,10 @@
             <img src="../../images/logo.jpg" alt="Mersin ODTÜ Mezunları Derneği">
             <div>
                 <h1>Mersin ODTÜ Mezunları Derneği</h1>
-                <span>Üye Kayıt Sistemi</span>
             </div>
         </div>
 
-        <div class="login-container">
+        <div class="login-container" id="loginView">
             <h2>Giriş Yap</h2>
             <p class="sub">Devam etmek için hesap bilgilerinizi girin.</p>
             <form id="loginForm">
@@ -28,9 +27,87 @@
                     <label for="password">Şifre</label>
                     <input type="password" id="password" placeholder="••••••••" required>
                 </div>
+                <label class="remember-field" for="rememberMe">
+                    <input type="checkbox" id="rememberMe">
+                    Beni Hatırla
+                </label>
                 <button type="submit">Giriş Yap</button>
                 <div id="loginError" class="error-message">Hatalı kullanıcı adı ya da şifre!</div>
             </form>
+            <p class="switch-link">Üye hesabınız yok mu? <a href="#" onclick="showRegisterView(); return false;">Hesap Oluştur</a></p>
+            <p class="switch-link">Şifrenizi mi unuttunuz? <a href="#" onclick="showResetView(); return false;">Şifremi Unuttum</a></p>
+        </div>
+
+        <div class="login-container" id="registerView" style="display:none;">
+            <h2>Hesap Oluştur</h2>
+            <p class="sub">Kimliğinizi doğrulamak için üyelik bilgilerinizi girin.</p>
+            <form id="registerForm">
+                <div class="field">
+                    <label for="regTcKimlikNo">T.C. Kimlik No</label>
+                    <input type="text" id="regTcKimlikNo" placeholder="T.C. Kimlik No" maxlength="11" inputmode="numeric" required>
+                </div>
+                <div class="field">
+                    <label for="regDogumTarihi">Doğum Tarihi</label>
+                    <input type="date" id="regDogumTarihi" required>
+                </div>
+                <div class="field">
+                    <label for="regEmail">E-posta</label>
+                    <input type="email" id="regEmail" placeholder="ornek@mail.com" required>
+                </div>
+                <div class="field">
+                    <label for="regPassword">Şifre</label>
+                    <input type="password" id="regPassword" placeholder="Şifrenizi belirleyin" required>
+                    <ul class="password-hint" id="passwordHint">
+                        <li id="hintLength">En az 8 karakter</li>
+                        <li id="hintLower">En az bir küçük harf</li>
+                        <li id="hintUpper">En az bir büyük harf</li>
+                        <li id="hintNumber">En az bir rakam</li>
+                        <li id="hintSpecial">En az bir özel karakter (*, ., , gibi)</li>
+                    </ul>
+                </div>
+                <div class="field">
+                    <label for="regPasswordConfirm">Şifre Tekrar</label>
+                    <input type="password" id="regPasswordConfirm" placeholder="Şifrenizi tekrar girin" required>
+                </div>
+                <button type="submit">Hesap Oluştur</button>
+                <div id="registerError" class="error-message"></div>
+                <div id="registerSuccess" class="success-message"></div>
+            </form>
+            <p class="switch-link">Zaten hesabınız var mı? <a href="#" onclick="showLoginView(); return false;">Giriş Yap</a></p>
+        </div>
+
+        <div class="login-container" id="resetView" style="display:none;">
+            <h2>Şifremi Unuttum</h2>
+            <p class="sub">Kimliğinizi doğrulayıp yeni bir şifre belirleyin.</p>
+            <form id="resetForm">
+                <div class="field">
+                    <label for="resetTcKimlikNo">T.C. Kimlik No</label>
+                    <input type="text" id="resetTcKimlikNo" placeholder="T.C. Kimlik No" maxlength="11" inputmode="numeric" required>
+                </div>
+                <div class="field">
+                    <label for="resetDogumTarihi">Doğum Tarihi</label>
+                    <input type="date" id="resetDogumTarihi" required>
+                </div>
+                <div class="field">
+                    <label for="resetPassword">Yeni Şifre</label>
+                    <input type="password" id="resetPassword" placeholder="Yeni şifrenizi belirleyin" required>
+                    <ul class="password-hint" id="resetPasswordHint">
+                        <li id="resetHintLength">En az 8 karakter</li>
+                        <li id="resetHintLower">En az bir küçük harf</li>
+                        <li id="resetHintUpper">En az bir büyük harf</li>
+                        <li id="resetHintNumber">En az bir rakam</li>
+                        <li id="resetHintSpecial">En az bir özel karakter (*, ., , gibi)</li>
+                    </ul>
+                </div>
+                <div class="field">
+                    <label for="resetPasswordConfirm">Yeni Şifre Tekrar</label>
+                    <input type="password" id="resetPasswordConfirm" placeholder="Yeni şifrenizi tekrar girin" required>
+                </div>
+                <button type="submit">Şifreyi Güncelle</button>
+                <div id="resetError" class="error-message"></div>
+                <div id="resetSuccess" class="success-message"></div>
+            </form>
+            <p class="switch-link">Şifrenizi hatırladınız mı? <a href="#" onclick="showLoginView(); return false;">Giriş Yap</a></p>
         </div>
     </div>
 

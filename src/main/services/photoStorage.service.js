@@ -24,4 +24,13 @@ function deletePhotoFile(photosDir, relativePath) {
   if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 }
 
-module.exports = { savePhotoFromDataUrl, toFileUrl, deletePhotoFile };
+// Güncelleme payload'ından yeni foto yolunu çözer: undefined = fotoğrafa dokunma,
+// null = kaldır, string = yeni kaydedilmiş dosya yolu.
+function resolvePhotoPath(photosDir, member) {
+  const isNewPhoto = member.photo && member.photo.startsWith('data:image/');
+  if (isNewPhoto) return savePhotoFromDataUrl(photosDir, member.photo);
+  if (member.removePhoto) return null;
+  return undefined;
+}
+
+module.exports = { savePhotoFromDataUrl, toFileUrl, deletePhotoFile, resolvePhotoPath };

@@ -30,7 +30,7 @@
 
     <main class="content">
 
-        <section class="panel" aria-labelledby="formPanelTitle">
+        <section class="panel" id="memberFormPanel" aria-labelledby="formPanelTitle">
             <div class="panel-head">
                 <div>
                     <h2 id="formPanelTitle">Üye Kaydı</h2>
@@ -49,6 +49,22 @@
                         <input type="text" id="name" placeholder="Ad Soyad">
                     </div>
                     <div class="form-group">
+                        <label for="tcKimlikNo">T.C. Kimlik No</label>
+                        <input type="text" id="tcKimlikNo" placeholder="T.C. Kimlik No" maxlength="11" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label for="cinsiyet">Cinsiyet</label>
+                        <select id="cinsiyet">
+                            <option value="">Seçiniz</option>
+                            <option value="ERKEK">Erkek</option>
+                            <option value="KADIN">Kadın</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dogumTarihi">Doğum Tarihi</label>
+                        <input type="date" id="dogumTarihi">
+                    </div>
+                    <div class="form-group">
                         <label for="department">Bölüm</label>
                         <select id="department" onchange="checkCustomDepartment()"></select>
                         <input type="text" id="customDepartment" placeholder="Bölüm giriniz..." style="display: none;">
@@ -56,6 +72,16 @@
                     <div class="form-group">
                         <label for="graduation">Mezuniyet Yılı</label>
                         <input type="number" id="graduation" placeholder="2022" inputmode="numeric" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="ogrenimDurumu">Öğrenim Durumu</label>
+                        <select id="ogrenimDurumu">
+                            <option value="">Seçiniz</option>
+                            <option value="Lise">Lise</option>
+                            <option value="Lisans">Lisans</option>
+                            <option value="Yüksek Lisans">Yüksek Lisans</option>
+                            <option value="Doktora">Doktora</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -89,10 +115,6 @@
                         <label for="meslek">Mesleği</label>
                         <input type="text" id="meslek" placeholder="Meslek">
                     </div>
-                    <div class="form-group">
-                        <label for="pozisyon">Pozisyon</label>
-                        <input type="text" id="pozisyon" placeholder="Pozisyon">
-                    </div>
                 </div>
             </div>
 
@@ -100,16 +122,56 @@
                 <h3 class="section-label"><i class="fas fa-id-badge"></i>Üyelik</h3>
                 <div class="field-grid">
                     <div class="form-group">
-                        <label for="uyelikGiris">Üyelik Giriş Tarihi</label>
+                        <label for="uyeNiteligi">Üye Niteliği</label>
+                        <select id="uyeNiteligi">
+                            <option value="Gerçek">Gerçek</option>
+                            <option value="Tüzel">Tüzel</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="uyeTur">Üye Türü</label>
+                        <select id="uyeTur">
+                            <option value="Üye">Üye</option>
+                            <option value="Kurucu">Kurucu</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="durum">Durum</label>
+                        <select id="durum">
+                            <option value="Aktif">Aktif</option>
+                            <option value="Pasif">Pasif</option>
+                        </select>
+                    </div>
+                    <label class="check-field" for="onursalUye">
+                        <input type="checkbox" id="onursalUye">
+                        Onursal Üye
+                    </label>
+                    <div class="form-group">
+                        <label for="uyelikGiris">Üyelik Giriş Tarihi (Kayıt Tarihi)</label>
                         <input type="date" id="uyelikGiris">
                     </div>
                     <div class="form-group">
-                        <label for="uyelikCikis">Üyelik Çıkış Tarihi</label>
+                        <label for="uyelikCikis">Üyelik Çıkış Tarihi (Pasif Olma Tarihi)</label>
                         <input type="date" id="uyelikCikis">
+                    </div>
+                    <div class="form-group">
+                        <label for="yonetimKuruluKararTarihi">Yönetim Kurulu Karar Tarihi</label>
+                        <input type="date" id="yonetimKuruluKararTarihi">
+                    </div>
+                    <div class="form-group">
+                        <label for="pasifOlmaNedeni">Pasif Olma Nedeni</label>
+                        <input type="text" id="pasifOlmaNedeni" placeholder="Pasif Olma Nedeni">
+                    </div>
+                    <div class="form-group">
+                        <label for="pasifOlmaBildirimTarihi">Pasif Olma Bildirim Tarihi</label>
+                        <input type="date" id="pasifOlmaBildirimTarihi">
                     </div>
                     <div class="form-group">
                         <label for="photoUpload">Fotoğraf</label>
                         <input type="file" id="photoUpload">
+                        <button type="button" id="removePhotoBtn" class="btn-ghost" style="display:none; margin-top:8px;" onclick="removePhoto()">
+                            <i class="fas fa-trash"></i> Fotoğrafı Kaldır
+                        </button>
                     </div>
                 </div>
             </div>
@@ -121,10 +183,17 @@
                     <div class="form-group">
                         <label for="aidatDonemiSelect">Aidat Dönemi</label>
                         <select id="aidatDonemiSelect">
+                            <option value="2025-2026">2025-2026</option>
                             <option value="2024-2025">2024-2025</option>
                             <option value="2023-2024">2023-2024</option>
                             <option value="2022-2023">2022-2023</option>
                             <option value="2021-2022">2021-2022</option>
+                            <option value="2020-2021">2020-2021</option>
+                            <option value="2019-2020">2019-2020</option>
+                            <option value="2018-2019">2018-2019</option>
+                            <option value="2017-2018">2017-2018</option>
+                            <option value="2016-2017">2016-2017</option>
+                            <option value="2015-2016">2015-2016</option>
                         </select>
                     </div>
                     <label class="check-field" for="aidatOdendiCheck">
@@ -166,66 +235,193 @@
             </div>
         </section>
 
+        <section class="panel" id="viewerProfileCard" aria-labelledby="profileCardTitle">
+            <div class="profile-card-body">
+                <div class="profile-card-photo-col">
+                    <div class="panel-head profile-card-head">
+                        <div>
+                            <h2 id="profileCardTitle">Profilim</h2>
+                            <p class="panel-sub">Kendi bilgilerinizi görüntüleyin ve güncelleyin.</p>
+                        </div>
+                    </div>
+                    <img id="profilePhotoPreview" class="profile-card-photo" src="" alt="Profil fotoğrafı">
+                    <div class="profile-card-photo-actions">
+                        <label for="profilePhotoUpload" class="btn-secondary">
+                            <i class="fas fa-camera"></i> Fotoğraf Değiştir
+                        </label>
+                        <input type="file" id="profilePhotoUpload" accept="image/*" style="display:none;">
+                        <button type="button" id="profileRemovePhotoBtn" class="btn-ghost" style="display:none;" onclick="removeProfilePhoto()">
+                            <i class="fas fa-trash"></i> Fotoğrafı Kaldır
+                        </button>
+                    </div>
+                </div>
+
+                <div class="profile-card-info">
+                    <div class="profile-card-readonly">
+                        <div class="profile-card-row">
+                            <span class="profile-card-label">Ad Soyad</span>
+                            <span class="profile-card-value" id="profileAdSoyad"></span>
+                        </div>
+                        <div class="profile-card-row">
+                            <span class="profile-card-label">Üyelik Durumu</span>
+                            <span class="profile-card-value" id="profileDurum"></span>
+                        </div>
+                        <div class="profile-card-row">
+                            <span class="profile-card-label">Burs</span>
+                            <span class="profile-card-value" id="profileBurs"></span>
+                        </div>
+                        <div class="profile-card-row profile-card-row--pills">
+                            <span class="profile-card-label">Aidat Durumu</span>
+                            <div class="profile-card-pills" id="profileAidatPills"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-label"><i class="fas fa-pen-to-square"></i>Bilgilerimi Güncelle</h3>
+                        <div class="field-grid">
+                            <div class="form-group">
+                                <label for="profileEmail">Mail Adresi</label>
+                                <input type="email" id="profileEmail" placeholder="ornek@mail.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="profileTelefon">Telefon Numarası</label>
+                                <input type="tel" id="profileTelefon" placeholder="05xxxxxxxxx">
+                            </div>
+                            <div class="form-group">
+                                <label for="profileDepartment">Bölüm</label>
+                                <select id="profileDepartment" onchange="checkCustomProfileDepartment()"></select>
+                                <input type="text" id="profileCustomDepartment" placeholder="Bölüm giriniz..." style="display: none;">
+                            </div>
+                            <div class="form-group">
+                                <label for="profileGraduation">Mezuniyet Yılı</label>
+                                <input type="number" id="profileGraduation" placeholder="2022" inputmode="numeric" step="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="profileMeslek">Mesleği</label>
+                                <input type="text" id="profileMeslek" placeholder="Meslek">
+                            </div>
+                            <div class="form-group">
+                                <label for="profileIsyeri">Çalıştığı Kurum</label>
+                                <input type="text" id="profileIsyeri" placeholder="İşyeri adı">
+                            </div>
+                            <div class="form-group">
+                                <label for="profileSehir">Yaşadığı Şehir</label>
+                                <input type="text" id="profileSehir" placeholder="Şehir">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-actions">
+                        <button onclick="saveProfile()" id="profileSaveButton" class="btn-primary"><i class="fas fa-check"></i>Kaydet</button>
+                        <span id="profileSaveMessage" class="profile-save-message"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="panel" aria-labelledby="listPanelTitle">
             <div class="panel-head">
                 <div>
                     <h2 id="listPanelTitle">Kayıtlı Üyeler</h2>
-                    <p class="panel-sub">Üyeleri arayın, aidat durumuna göre filtreleyin.</p>
+                    <p class="panel-sub" id="listPanelSub">Üyeleri arayın, aidat durumuna göre filtreleyin.</p>
                 </div>
+                <label class="check-field toggle-member-list" for="toggleMemberList">
+                    <input type="checkbox" id="toggleMemberList" onchange="toggleMemberListVisibility()">
+                    Üye listesini göster
+                </label>
             </div>
 
-            <div class="toolbar">
-                <div class="search-box">
-                    <i class="fas fa-magnifying-glass"></i>
-                    <input type="text" id="search" placeholder="İsim veya bölüme göre ara..." onkeyup="filterMembers()">
+            <div id="memberListBody">
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i class="fas fa-magnifying-glass"></i>
+                        <input type="text" id="search" placeholder="İsim ile ara..." onkeyup="applyMemberView()">
+                    </div>
+
+                    <div class="filter-group">
+                        <div class="form-group compact">
+                            <label for="donemFiltre">Dönem</label>
+                            <select id="donemFiltre">
+                                <option value="">Tümü</option>
+                                <option value="2015-2016">2015-2016</option>
+                                <option value="2016-2017">2016-2017</option>
+                                <option value="2017-2018">2017-2018</option>
+                                <option value="2018-2019">2018-2019</option>
+                                <option value="2019-2020">2019-2020</option>
+                                <option value="2020-2021">2020-2021</option>
+                                <option value="2021-2022">2021-2022</option>
+                                <option value="2022-2023">2022-2023</option>
+                                <option value="2023-2024">2023-2024</option>
+                                <option value="2024-2025">2024-2025</option>
+                                <option value="2025-2026">2025-2026</option>
+                            </select>
+                        </div>
+                        <div class="form-group compact">
+                            <label for="odemeFiltre">Ödeme Durumu</label>
+                            <select id="odemeFiltre">
+                                <option value="">Tümü</option>
+                                <option value="1">Ödedi</option>
+                                <option value="0">Ödemedi</option>
+                            </select>
+                        </div>
+                        <button class="btn-secondary" onclick="applyMemberView()"><i class="fas fa-filter"></i>Filtrele</button>
+                        <button class="btn-ghost" onclick="clearFilter()">Temizle</button>
+                    </div>
                 </div>
 
-                <div class="filter-group">
-                    <div class="form-group compact">
-                        <label for="donemFiltre">Dönem</label>
-                        <select id="donemFiltre">
-                            <option value="">Tümü</option>
-                            <option value="2021-2022">2021-2022</option>
-                            <option value="2022-2023">2022-2023</option>
-                            <option value="2023-2024">2023-2024</option>
-                            <option value="2024-2025">2024-2025</option>
-                        </select>
-                    </div>
-                    <div class="form-group compact">
-                        <label for="odemeFiltre">Ödeme Durumu</label>
-                        <select id="odemeFiltre">
-                            <option value="">Tümü</option>
-                            <option value="1">Ödedi</option>
-                            <option value="0">Ödemedi</option>
-                        </select>
-                    </div>
-                    <button class="btn-secondary" onclick="filterByDonem()"><i class="fas fa-filter"></i>Filtrele</button>
-                    <button class="btn-ghost" onclick="clearFilter()">Temizle</button>
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th class="col-rowno">#</th>
+                                <th>Fotoğraf</th>
+                                <th id="thAdSoyad" class="sortable-th" onclick="toggleNameSort()">
+                                    Ad Soyad <i class="fas fa-sort" id="nameSortIcon"></i>
+                                </th>
+                                <th id="thBolum" class="sortable-th" onclick="toggleDeptFilterDropdown(event)">
+                                    Bölüm <i class="fas fa-filter" id="deptFilterIcon"></i>
+                                    <select id="deptFilterSelect" class="dept-filter-dropdown" style="display:none;" onclick="event.stopPropagation()" onchange="applyDeptFilterFromSelect()">
+                                        <option value="">Tümü</option>
+                                    </select>
+                                </th>
+                                <th>Mezuniyet Yılı</th>
+                                <th class="col-aidat">Aidat Dönemi</th>
+                                <th class="col-aidat">Aidat Durumu</th>
+                                <th class="col-burs">Burs</th>
+                                <th class="col-not">Not</th>
+                                <th class="col-detaylar">Detaylar</th>
+                                <th class="col-duzenle">Düzenle</th>
+                                <th class="col-geri-al">Geri Al</th>
+                                <th class="col-sil">Sil</th>
+                            </tr>
+                        </thead>
+                        <tbody id="memberTable"></tbody>
+                    </table>
                 </div>
-            </div>
-
-            <div class="table-scroll">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Fotoğraf</th>
-                            <th>Ad Soyad</th>
-                            <th>Bölüm</th>
-                            <th>Mezuniyet Yılı</th>
-                            <th>Aidat Dönemi</th>
-                            <th>Aidat Durumu</th>
-                            <th>Burs</th>
-                            <th>Detaylar</th>
-                            <th>Düzenle</th>
-                            <th>Sil</th>
-                        </tr>
-                    </thead>
-                    <tbody id="memberTable"></tbody>
-                </table>
             </div>
         </section>
 
     </main>
+
+    <div id="photoModal" class="photo-modal-overlay" style="display:none;" onclick="if(event.target===this) closePhotoModal();">
+        <div class="photo-modal">
+            <h3 id="photoModalName"></h3>
+            <img id="photoModalImg" src="" alt="">
+            <button class="btn-ghost" onclick="closePhotoModal()">Kapat</button>
+        </div>
+    </div>
+
+    <div id="noteModal" class="note-modal-overlay" style="display:none;">
+        <div class="note-modal">
+            <h3>Not — <span id="noteModalName"></span></h3>
+            <p class="panel-sub">Bu not sadece sizin hesabınızda görünür.</p>
+            <textarea id="noteModalText" rows="6" placeholder="Bu üye hakkında özel notunuz..."></textarea>
+            <div class="note-modal-actions">
+                <button class="btn-primary" onclick="saveNote()"><i class="fas fa-check"></i>Kaydet</button>
+                <button class="btn-ghost" onclick="closeNoteModal()">Kapat</button>
+            </div>
+        </div>
+    </div>
 
     <footer id="footer">
         Telif Hakkı © 2025 Ünsal Okuducu &amp; Mehmet Can Sabancı. Tüm Hakları Saklıdır.
@@ -234,6 +430,7 @@
     <script src="js/ui.js"></script>
     <script src="js/members.js"></script>
     <script src="js/filters.js"></script>
+    <script src="js/profile.js"></script>
 
 </body>
 

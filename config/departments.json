@@ -5,7 +5,7 @@
       "Endüstriyel Tasarım"
     ],
     "Fen Edebiyat Fakültesi": [
-      "Biyoloji",
+      "Biyolojik Bilimler",
       "Kimya",
       "Fizik",
       "Matematik",
@@ -18,17 +18,17 @@
     ],
     "İktisadi ve İdari Bilimler Fakültesi": [
       "İşletme",
-      "Ekonomi",
+      "İktisat",
       "Uluslararası İlişkiler",
       "Siyaset Bilimi ve Kamu Yönetimi"
     ],
     "Eğitim Fakültesi": [
       "Bilgisayar ve Öğretim Teknolojileri Eğitimi",
       "Eğitim Bilimleri",
-      "İlköğretim",
+      "Temel Eğitim",
       "Yabancı Diller Eğitimi",
       "Beden Eğitimi ve Spor",
-      "Ortaöğretim Fen ve Matematik Alanları Eğitimi"
+      "Matematik ve Fen Bilimleri Eğitimi"
     ],
     "Mühendislik Fakültesi": [
       "Havacılık ve Uzay Mühendisliği",
@@ -41,10 +41,9 @@
       "Gıda Mühendisliği",
       "Jeoloji Mühendisliği",
       "Endüstri Mühendisliği",
-      "Makine Mühendisliği",
+      "Makina Mühendisliği",
       "Metalurji ve Malzeme Mühendisliği",
       "Maden Mühendisliği",
       "Petrol ve Doğal Gaz Mühendisliği"
     ]
   }
-  

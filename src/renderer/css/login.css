@@ -122,6 +122,23 @@ body {
     background-color: var(--red-deep);
 }
 
+.remember-field {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.remember-field input {
+    width: auto;
+    padding: 0;
+    accent-color: var(--red);
+}
+
 .error-message {
     color: var(--bad);
     background: var(--bad-soft);
@@ -132,4 +149,65 @@ body {
     text-align: center;
     font-size: 13px;
     font-weight: 600;
+}
+
+.success-message {
+    color: var(--good, #1a7f37);
+    background: var(--good-soft, #e6f4ea);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    margin-top: 14px;
+    display: none;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.switch-link {
+    margin: 16px 0 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+}
+
+.switch-link a {
+    color: var(--sea);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.switch-link a:hover {
+    text-decoration: underline;
+}
+
+.password-hint {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.password-hint li {
+    font-size: 12px;
+    color: var(--muted);
+    position: relative;
+    padding-left: 16px;
+}
+
+.password-hint li::before {
+    content: '○';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+}
+
+.password-hint li.met {
+    color: var(--good, #1a7f37);
+}
+
+.password-hint li.met::before {
+    content: '✓';
+    color: var(--good, #1a7f37);
 }
