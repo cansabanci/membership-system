@@ -34,7 +34,10 @@ function createApp() {
   app.use(cors({ origin: config.CORS_ORIGIN, credentials: true }));
   app.use(express.json({ limit: '8mb' }));
   app.use(cookieParser());
-  app.use(sessionMiddleware);
+  // Sadece /api altina — statik dosya isteklerine (css/js/resim) de uygulanirsa, rolling:true
+  // idle timeout'u sayfa acikken arka planda gelen her kaynak istegiyle sessizce sifirlar
+  // ve ozelligi anlamsizlastirirdi (Faz3 test sirasinda tespit edildi).
+  app.use('/api', sessionMiddleware);
 
   // /api/auth altındaki login/register/reset-password bilerek CSRF korumasi disinda —
   // henuz bir oturum/token'i olmayan anonim kullanicilar icin, korunacak bir oturum yok.

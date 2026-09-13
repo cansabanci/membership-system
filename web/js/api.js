@@ -21,6 +21,14 @@ async function apiFetch(method, path, body) {
 
     if (json && json.csrfToken) csrfToken = json.csrfToken;
 
+    // Oturum suresi doldu (idle timeout) ya da baska bir sebeple gecersiz oldu — /api/auth/*
+    // disindaki her istekte otomatik login'e don (auth route'lari kendi 401 mesajini
+    // (yanlis sifre, vb.) inline gostermesi gerektigi icin bu yonlendirmeden haric tutulur).
+    if (response.status === 401 && !path.startsWith('/api/auth/')) {
+        window.location.href = 'login.html';
+        throw new Error('Oturum süresi doldu, giriş sayfasına yönlendiriliyorsunuz.');
+    }
+
     if (!response.ok) {
         throw new Error((json && json.error) || 'Bir hata oluştu.');
     }
