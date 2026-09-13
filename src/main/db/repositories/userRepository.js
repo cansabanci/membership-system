@@ -81,6 +81,15 @@ async function updatePassword(userId, plainPassword) {
   await pool.request().input('id', sql.Int, userId).input('password', sql.NVarChar, hashed).query('UPDATE kullanicilar SET password=@password WHERE id=@id');
 }
 
+// Bir oturumun (session) hala gecerli bir hesaba ait olup olmadigini dogrulamak icin —
+// hesap silindikten sonra da o hesaba ait eski bir oturum cerezi (sid) hayalet olarak
+// kalabiliyor, bu fonksiyon o durumu server tarafinda yakalayip temiz bir 401'e cevirmeyi saglar.
+async function userExists(id) {
+  const pool = getPool();
+  const result = await pool.request().input('id', sql.Int, id).query('SELECT id FROM kullanicilar WHERE id=@id');
+  return !!result.recordset[0];
+}
+
 module.exports = {
   findByCredentials,
   findClaimableMember,
@@ -89,4 +98,5 @@ module.exports = {
   deleteAccountByMemberId,
   findAccountByIdentity,
   updatePassword,
+  userExists,
 };
