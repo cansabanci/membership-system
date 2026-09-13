@@ -2,6 +2,11 @@
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// ---------- Üye listesi veri modeli (tablo tamamen bu diziden yeniden çizilir) ----------
+let allMembers = [];
+let sortState = 'none'; // 'none' | 'asc' | 'desc' — Ad Soyad sıralaması
+let deptFilter = null; // seçili bölüm filtresi (null = tümü)
+
 // Mini tabloya aidat dönemi ekleme
 function addAidatToList() {
     const donemSelect = document.getElementById('aidatDonemiSelect');
@@ -64,12 +69,22 @@ function readMemberForm() {
         mezuniyet: document.getElementById('graduation').value.trim(),
         isyeri: document.getElementById('isyeri').value.trim(),
         meslek: document.getElementById('meslek').value.trim(),
-        pozisyon: document.getElementById('pozisyon').value.trim(),
         sehir: document.getElementById('sehir').value.trim(),
         uyelikGiris: document.getElementById('uyelikGiris').value,
         uyelikCikis: document.getElementById('uyelikCikis').value,
         bursMiktar: parseInt(document.getElementById('bursMiktar').value) || 0,
         bursTip: document.getElementById('bursTip').value,
+        tcKimlikNo: document.getElementById('tcKimlikNo').value.trim(),
+        cinsiyet: document.getElementById('cinsiyet').value,
+        dogumTarihi: document.getElementById('dogumTarihi').value,
+        ogrenimDurumu: document.getElementById('ogrenimDurumu').value,
+        uyeNiteligi: document.getElementById('uyeNiteligi').value,
+        uyeTur: document.getElementById('uyeTur').value,
+        onursalUye: document.getElementById('onursalUye').checked,
+        durum: document.getElementById('durum').value,
+        yonetimKuruluKararTarihi: document.getElementById('yonetimKuruluKararTarihi').value,
+        pasifOlmaNedeni: document.getElementById('pasifOlmaNedeni').value.trim(),
+        pasifOlmaBildirimTarihi: document.getElementById('pasifOlmaBildirimTarihi').value,
         aidatlar: readAidatList(),
     };
 }
@@ -91,7 +106,6 @@ function isValidMembershipDate(value) {
 // Zorunlu alan / format kontrolü. Geçerliyse null, değilse hata mesajı döner.
 function validateMemberForm(data) {
     if (!data.adsoyad) return 'Ad Soyad boş bırakılamaz.';
-    if (!data.bolum) return 'Lütfen bir bölüm seçin veya girin.';
     if (data.email && !EMAIL_REGEX.test(data.email)) return 'Mail adresi geçerli görünmüyor.';
     if (!isValidYear(data.mezuniyet)) return `Mezuniyet yılı ${MIN_YEAR} ile ${CURRENT_YEAR} arasında, 4 haneli bir yıl olmalı.`;
     if (!isValidMembershipDate(data.uyelikGiris)) return 'Üyelik giriş tarihi geçerli değil.';
@@ -99,7 +113,6 @@ function validateMemberForm(data) {
     if (data.uyelikGiris && data.uyelikCikis && data.uyelikGiris > data.uyelikCikis) {
         return 'Üyelik çıkış tarihi, giriş tarihinden önce olamaz.';
     }
-    if (data.aidatlar.length === 0) return 'Lütfen en az bir aidat dönemi ekleyin!';
     return null;
 }
 
@@ -134,8 +147,19 @@ async function saveMember() {
     resetForm();
 }
 
+let photoRemoved = false;
+
+function removePhoto() {
+    photoRemoved = true;
+    document.getElementById('editingPhoto').value = '';
+    document.getElementById('photoUpload').value = '';
+    document.getElementById('removePhotoBtn').style.display = 'none';
+}
+
 async function updateMember() {
-    const id = document.getElementById('editingRowIndex').value;
+    // input.value her zaman string döner — allMembers'taki id'ler DB'den sayı olarak geliyor,
+    // Number() ile normalize etmezsek member-updated eşleştirmesi başarısız olup satırı çoğaltır.
+    const id = Number(document.getElementById('editingRowIndex').value);
     if (!id) return;
 
     const data = readMemberForm();
@@ -146,13 +170,13 @@ async function updateMember() {
     }
 
     const photoFile = getPhotoFile();
-    const existingPhoto = document.getElementById('editingPhoto').value;
+    const member = { id, ...data };
 
-    const member = {
-        id,
-        ...data,
-        photo: photoFile ? await readPhotoAsDataUrl(photoFile) : existingPhoto,
-    };
+    if (photoFile) {
+        member.photo = await readPhotoAsDataUrl(photoFile);
+    } else if (photoRemoved) {
+        member.removePhoto = true;
+    }
 
     ipcRenderer.send('update-member', member);
     resetForm();
@@ -165,7 +189,6 @@ function resetForm() {
     document.getElementById('graduation').value = '';
     document.getElementById('isyeri').value = '';
     document.getElementById('meslek').value = '';
-    document.getElementById('pozisyon').value = '';
     document.getElementById('sehir').value = '';
     document.getElementById('uyelikGiris').value = '';
     document.getElementById('uyelikCikis').value = '';
@@ -174,10 +197,23 @@ function resetForm() {
     document.getElementById('photoUpload').value = '';
     document.getElementById('editingRowIndex').value = '';
     document.getElementById('editingPhoto').value = '';
+    document.getElementById('removePhotoBtn').style.display = 'none';
+    photoRemoved = false;
     document.getElementById('department').value = '';
     document.getElementById('customDepartment').value = '';
     document.getElementById('customDepartment').style.display = 'none';
     document.getElementById('aidatTableBody').innerHTML = '';
+    document.getElementById('tcKimlikNo').value = '';
+    document.getElementById('cinsiyet').value = '';
+    document.getElementById('dogumTarihi').value = '';
+    document.getElementById('ogrenimDurumu').value = '';
+    document.getElementById('uyeNiteligi').value = 'Gerçek';
+    document.getElementById('uyeTur').value = 'Üye';
+    document.getElementById('onursalUye').checked = false;
+    document.getElementById('durum').value = 'Aktif';
+    document.getElementById('yonetimKuruluKararTarihi').value = '';
+    document.getElementById('pasifOlmaNedeni').value = '';
+    document.getElementById('pasifOlmaBildirimTarihi').value = '';
     document.getElementById('saveButton').style.display = 'inline-block';
     document.getElementById('updateButton').style.display = 'none';
 }
@@ -193,10 +229,20 @@ function editMember(member) {
     document.getElementById('telefon').value = member.telefon || '';
     document.getElementById('isyeri').value = member.isyeri || '';
     document.getElementById('meslek').value = member.meslek || '';
-    document.getElementById('pozisyon').value = member.pozisyon || '';
     document.getElementById('sehir').value = member.sehir || '';
     document.getElementById('uyelikGiris').value = member.uyelikGiris || '';
     document.getElementById('uyelikCikis').value = member.uyelikCikis || '';
+    document.getElementById('tcKimlikNo').value = member.tcKimlikNo || '';
+    document.getElementById('cinsiyet').value = member.cinsiyet || '';
+    document.getElementById('dogumTarihi').value = member.dogumTarihi || '';
+    document.getElementById('ogrenimDurumu').value = member.ogrenimDurumu || '';
+    document.getElementById('uyeNiteligi').value = member.uyeNiteligi || 'Gerçek';
+    document.getElementById('uyeTur').value = member.uyeTur || 'Üye';
+    document.getElementById('onursalUye').checked = !!member.onursalUye;
+    document.getElementById('durum').value = member.durum || 'Aktif';
+    document.getElementById('yonetimKuruluKararTarihi').value = member.yonetimKuruluKararTarihi || '';
+    document.getElementById('pasifOlmaNedeni').value = member.pasifOlmaNedeni || '';
+    document.getElementById('pasifOlmaBildirimTarihi').value = member.pasifOlmaBildirimTarihi || '';
 
     const departmentSelect = document.getElementById('department');
     const customInput = document.getElementById('customDepartment');
@@ -243,19 +289,25 @@ function editMember(member) {
     }
 
     document.getElementById('editingPhoto').value = member.photo || '';
+    photoRemoved = false;
+    document.getElementById('removePhotoBtn').style.display = member.photo ? 'inline-block' : 'none';
 
     document.getElementById('saveButton').style.display = 'none';
     document.getElementById('updateButton').style.display = 'inline-block';
 }
 
-function addMemberToTable(member) {
+function addMemberToTable(member, rowNumber, initialDonemIndex) {
     const table = document.getElementById('memberTable');
 
     const row = table.insertRow();
     row.setAttribute('data-id', member.id);
     row.classList.add('main-row');
 
-    const imgCell = row.insertCell(0);
+    const rowNoCell = row.insertCell(0);
+    rowNoCell.className = 'col-rowno';
+    rowNoCell.textContent = rowNumber;
+
+    const imgCell = row.insertCell(1);
     if (member.photo) {
         const img = document.createElement('img');
         img.src = member.photo;
@@ -263,16 +315,18 @@ function addMemberToTable(member) {
         img.onerror = () => {
             imgCell.textContent = '📷';
         };
+        img.onclick = () => openPhotoModal(member.photo, member.adsoyad);
         imgCell.appendChild(img);
     } else {
         imgCell.textContent = '📷';
     }
 
-    row.insertCell(1).textContent = member.adsoyad;
-    row.insertCell(2).textContent = member.bolum;
-    row.insertCell(3).textContent = member.mezuniyet;
+    row.insertCell(2).textContent = member.adsoyad;
+    row.insertCell(3).textContent = member.bolum || '-';
+    row.insertCell(4).textContent = member.mezuniyet || '-';
 
-    const donemCell = row.insertCell(4);
+    const donemCell = row.insertCell(5);
+    donemCell.className = 'col-aidat';
     const select = document.createElement('select');
 
     member.donemler.forEach((donem, index) => {
@@ -282,8 +336,10 @@ function addMemberToTable(member) {
         select.appendChild(option);
     });
     donemCell.appendChild(select);
+    select.value = initialDonemIndex !== undefined ? initialDonemIndex : 0;
 
-    const odendiCell = row.insertCell(5);
+    const odendiCell = row.insertCell(6);
+    odendiCell.className = 'col-aidat';
     const statusSpan = document.createElement('span');
 
     function updateStatus(index) {
@@ -291,13 +347,24 @@ function addMemberToTable(member) {
         statusSpan.innerHTML = odendi === '✅' ? '✅' : '❌';
     }
 
-    updateStatus(0);
+    updateStatus(select.value);
     select.addEventListener('change', (e) => updateStatus(e.target.value));
     odendiCell.appendChild(statusSpan);
 
-    row.insertCell(6).textContent = `${member.bursMiktar} ₺ (${member.bursTip})`;
+    const bursCell = row.insertCell(7);
+    bursCell.className = 'col-burs';
+    bursCell.textContent = `${member.bursMiktar} ₺ (${member.bursTip})`;
 
-    const toggleCell = row.insertCell(7);
+    const noteCell = row.insertCell(8);
+    noteCell.className = 'col-not';
+    const noteBtn = document.createElement('button');
+    noteBtn.className = 'btn-note';
+    noteBtn.innerHTML = "<i class='fas fa-note-sticky'></i> Not";
+    noteBtn.onclick = () => openNoteModal(member.id, member.adsoyad);
+    noteCell.appendChild(noteBtn);
+
+    const toggleCell = row.insertCell(9);
+    toggleCell.className = 'col-detaylar';
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'btn-detail';
     toggleBtn.textContent = 'Detaylar';
@@ -310,61 +377,244 @@ function addMemberToTable(member) {
     editBtn.className = 'icon-btn icon-btn-edit';
     editBtn.innerHTML = "<i class='fas fa-edit'></i>";
     editBtn.onclick = () => editMember(member);
-    row.insertCell(8).appendChild(editBtn);
+    const duzenleCell = row.insertCell(10);
+    duzenleCell.className = 'col-duzenle';
+    duzenleCell.appendChild(editBtn);
+
+    const rollbackBtn = document.createElement('span');
+    rollbackBtn.className = 'icon-btn icon-btn-rollback';
+    rollbackBtn.innerHTML = "<i class='fas fa-rotate-left'></i>";
+    rollbackBtn.title = 'Son değişikliği geri al';
+    rollbackBtn.onclick = () => {
+        if (confirm(`${member.adsoyad} için son değişikliği geri almak istediğinize emin misiniz?`)) {
+            ipcRenderer.send('rollback-member', member.id);
+        }
+    };
+    const geriAlCell = row.insertCell(11);
+    geriAlCell.className = 'col-geri-al';
+    geriAlCell.appendChild(rollbackBtn);
 
     const deleteBtn = document.createElement('span');
     deleteBtn.className = 'icon-btn icon-btn-delete';
     deleteBtn.innerHTML = "<i class='fas fa-trash'></i>";
     deleteBtn.onclick = () => {
         ipcRenderer.send('delete-member', member.id);
+        allMembers = allMembers.filter((m) => m.id !== member.id);
         row.remove();
         detayRow.remove();
     };
-    row.insertCell(9).appendChild(deleteBtn);
+    const silCell = row.insertCell(12);
+    silCell.className = 'col-sil';
+    silCell.appendChild(deleteBtn);
 
     const detayRow = table.insertRow();
     detayRow.classList.add('detay-row');
     detayRow.style.display = 'none';
 
     const detayCell = detayRow.insertCell(0);
-    detayCell.colSpan = 10;
+    detayCell.colSpan = 13;
     detayCell.innerHTML = `
         <div style="text-align: left; padding: 10px;">
             <strong>📧 Mail:</strong> ${member.email || '-'}<br>
             <strong>📱 Telefon:</strong> ${member.telefon || '-'}<br>
             <strong>🏢 İş Yeri:</strong> ${member.isyeri || '-'}<br>
             <strong>👨‍🔧 Meslek:</strong> ${member.meslek || '-'}<br>
-            <strong>👔 Pozisyon:</strong> ${member.pozisyon || '-'}<br>
             <strong>🌍 Şehir:</strong> ${member.sehir || '-'}<br>
-            <strong>📅 Üyelik Tarihleri:</strong> ${member.uyelikGiris || '-'} / ${member.uyelikCikis || '-'}
+            <strong>📅 Üyelik Tarihleri:</strong> ${member.uyelikGiris || '-'} / ${member.uyelikCikis || '-'}<br>
+            <strong>🆔 T.C. Kimlik No:</strong> ${member.tcKimlikNo || '-'}<br>
+            <strong>⚧ Cinsiyet:</strong> ${member.cinsiyet || '-'}<br>
+            <strong>🎂 Doğum Tarihi:</strong> ${member.dogumTarihi || '-'}<br>
+            <strong>🎓 Öğrenim Durumu:</strong> ${member.ogrenimDurumu || '-'}<br>
+            <strong>🧾 Üye Niteliği / Türü:</strong> ${member.uyeNiteligi || '-'} / ${member.uyeTur || '-'}<br>
+            <strong>🏅 Onursal Üye:</strong> ${member.onursalUye ? 'Evet' : 'Hayır'}<br>
+            <strong>📌 Durum:</strong> ${member.durum || '-'}<br>
+            <strong>🗓️ Yönetim Kurulu Karar Tarihi:</strong> ${member.yonetimKuruluKararTarihi || '-'}<br>
+            <strong>🚪 Pasif Olma Nedeni / Bildirim Tarihi:</strong> ${member.pasifOlmaNedeni || '-'} / ${member.pasifOlmaBildirimTarihi || '-'}
         </div>
     `;
 }
 
-function renderMembers(members) {
+function renderMembers(members, donemIndexByMember) {
     document.getElementById('memberTable').innerHTML = '';
-    members.forEach((member) => addMemberToTable(member));
+    const total = members.length;
+    members.forEach((member, i) => {
+        // Z-A sıralamasında numaralar da tersten (N -> 1) gitsin — A-Z/orijinal sırada normal 1 -> N.
+        const rowNumber = sortState === 'desc' ? total - i : i + 1;
+        const initialDonemIndex = donemIndexByMember ? donemIndexByMember.get(member.id) : undefined;
+        addMemberToTable(member, rowNumber, initialDonemIndex);
+    });
     applyRolePermissions();
 }
 
+// Arama kutusu + bölüm filtresi + dönem/ödeme filtresi + Ad Soyad sıralamasını `allMembers`
+// üzerinden tek bir hatta uygulayıp sonucu tabloya çizer. Tüm arama/sıralama/filtre kontrolleri
+// bu fonksiyonu çağırır — DOM'dan okumak yerine her zaman aynı veri modelinden yeniden hesaplanır.
+function applyMemberView() {
+    const searchValue = (document.getElementById('search').value || '').trim().toLowerCase();
+    const donemFiltreEl = document.getElementById('donemFiltre');
+    const odemeFiltreEl = document.getElementById('odemeFiltre');
+    const secilenDonem = donemFiltreEl ? donemFiltreEl.value : '';
+    const odemeDurumu = odemeFiltreEl ? odemeFiltreEl.value : '';
+
+    let list = allMembers.slice();
+
+    if (searchValue) {
+        list = list.filter((m) => (m.adsoyad || '').toLowerCase().startsWith(searchValue));
+    }
+
+    if (deptFilter) {
+        list = list.filter((m) => m.bolum === deptFilter);
+    }
+
+    // Bir dönem seçiliyse: sadece o dönem için aidat kaydı olan üyeler kalır, ve o üyenin
+    // satırındaki dönem seçici başlangıçta o döneme ayarlanır (eski davranışla birebir).
+    let donemIndexByMember = null;
+    if (secilenDonem) {
+        donemIndexByMember = new Map();
+        list = list.filter((m) => {
+            const idx = (m.donemler || []).indexOf(secilenDonem);
+            if (idx === -1) return false;
+            donemIndexByMember.set(m.id, idx);
+            return true;
+        });
+    }
+
+    if (odemeDurumu) {
+        list = list.filter((m) => {
+            const idx = donemIndexByMember ? donemIndexByMember.get(m.id) : 0;
+            const odendi = (m.donemler_odendi || [])[idx];
+            return odemeDurumu === '1' ? odendi === '✅' : odendi === '❌';
+        });
+    }
+
+    if (sortState !== 'none') {
+        list.sort((a, b) => {
+            const cmp = (a.adsoyad || '').localeCompare(b.adsoyad || '', 'tr');
+            return sortState === 'asc' ? cmp : -cmp;
+        });
+    }
+
+    renderMembers(list, donemIndexByMember);
+}
+
+// ---------- Ad Soyad başlığına tıklayınca A-Z / Z-A / orijinal sıra döngüsü ----------
+function toggleNameSort() {
+    sortState = sortState === 'none' ? 'asc' : sortState === 'asc' ? 'desc' : 'none';
+
+    const icon = document.getElementById('nameSortIcon');
+    icon.className = sortState === 'asc' ? 'fas fa-sort-up' : sortState === 'desc' ? 'fas fa-sort-down' : 'fas fa-sort';
+
+    applyMemberView();
+}
+
+// ---------- Bölüm başlığına tıklayınca tekil bölüm filtresi ----------
+function toggleDeptFilterDropdown(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('deptFilterSelect');
+    const willOpen = dropdown.style.display === 'none';
+
+    if (willOpen) {
+        const distinctDepts = [...new Set(allMembers.map((m) => m.bolum).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'tr'));
+        dropdown.innerHTML = '<option value="">Tümü</option>';
+        distinctDepts.forEach((dept) => {
+            const option = document.createElement('option');
+            option.value = dept;
+            option.textContent = dept;
+            dropdown.appendChild(option);
+        });
+        dropdown.value = deptFilter || '';
+    }
+
+    dropdown.style.display = willOpen ? 'inline-block' : 'none';
+}
+
+function applyDeptFilterFromSelect() {
+    const dropdown = document.getElementById('deptFilterSelect');
+    deptFilter = dropdown.value || null;
+
+    const icon = document.getElementById('deptFilterIcon');
+    icon.classList.toggle('dept-filter-active', !!deptFilter);
+
+    dropdown.style.display = 'none';
+    applyMemberView();
+}
+
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('deptFilterSelect');
+    if (dropdown && dropdown.style.display !== 'none' && !e.target.closest('#thBolum')) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// ---------- Viewer: "Üye listesini göster" ----------
+function toggleMemberListVisibility() {
+    const checked = document.getElementById('toggleMemberList').checked;
+    document.getElementById('memberListBody').style.display = checked ? '' : 'none';
+}
+
+if (typeof currentUserRole !== 'undefined' && currentUserRole === 'viewer') {
+    document.getElementById('memberListBody').style.display = 'none';
+}
+
 ipcRenderer.send('load-members');
-ipcRenderer.on('members-loaded', (event, members) => renderMembers(members));
+ipcRenderer.on('members-loaded', (event, members) => {
+    allMembers = members;
+    applyMemberView();
+});
 
 ipcRenderer.on('member-added', () => {
     ipcRenderer.send('load-members');
 });
 
 ipcRenderer.on('member-updated', (event, updatedMember) => {
-    const row = document.querySelector(`tr[data-id='${updatedMember.id}']`);
-    if (row) {
-        const detayRow = row.nextElementSibling;
-        row.remove();
-        if (detayRow && detayRow.classList.contains('detay-row')) {
-            detayRow.remove();
-        }
+    // Number() ile karşılaştır — id bazen string (form input'undan) bazen sayı (DB'den) gelebiliyor.
+    const index = allMembers.findIndex((m) => Number(m.id) === Number(updatedMember.id));
+    if (index !== -1) {
+        allMembers[index] = updatedMember;
+    } else {
+        allMembers.push(updatedMember);
     }
 
-    addMemberToTable(updatedMember);
+    applyMemberView();
     resetForm();
-    applyRolePermissions();
+});
+
+// ---------- Fotoğraf büyütme ----------
+function openPhotoModal(photoUrl, adsoyad) {
+    document.getElementById('photoModalName').textContent = adsoyad;
+    document.getElementById('photoModalImg').src = photoUrl;
+    document.getElementById('photoModal').style.display = 'flex';
+}
+
+function closePhotoModal() {
+    document.getElementById('photoModal').style.display = 'none';
+    document.getElementById('photoModalImg').src = '';
+}
+
+// ---------- Kişisel notlar (sadece giriş yapan hesaba özel) ----------
+let currentNoteUyeId = null;
+
+function openNoteModal(uyeId, adsoyad) {
+    currentNoteUyeId = uyeId;
+    document.getElementById('noteModalName').textContent = adsoyad;
+    document.getElementById('noteModalText').value = '';
+    ipcRenderer.send('get-member-note', uyeId);
+    document.getElementById('noteModal').style.display = 'flex';
+}
+
+function closeNoteModal() {
+    document.getElementById('noteModal').style.display = 'none';
+    currentNoteUyeId = null;
+}
+
+function saveNote() {
+    if (!currentNoteUyeId) return;
+    const metin = document.getElementById('noteModalText').value.trim();
+    ipcRenderer.send('save-member-note', { uyeId: currentNoteUyeId, metin });
+    closeNoteModal();
+}
+
+ipcRenderer.on('member-note-loaded', (event, { uyeId, metin }) => {
+    if (uyeId !== currentNoteUyeId) return;
+    document.getElementById('noteModalText').value = metin || '';
 });

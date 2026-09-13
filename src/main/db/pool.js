@@ -1,3 +1,6 @@
+// Bazı ağlarda (bozuk/yavaş IPv6 çözümlemesi) DNS aralıklı olarak IPv6 denemesinde
+// takılıp hataya düşebiliyor — IPv4'ü önceliklendirmek bunu önlüyor.
+require('dns').setDefaultResultOrder('ipv4first');
 const sql = require('mssql');
 
 const dbConfig = {
@@ -17,13 +20,13 @@ let pool = null;
 async function connect() {
   if (pool) return pool;
   pool = await sql.connect(dbConfig);
-  console.log('✅ MSSQL veritabanına bağlanıldı.');
+  console.log('✅ MSSQL veritabanina baglanildi.');
   return pool;
 }
 
 function getPool() {
   if (!pool) {
-    throw new Error('Veritabanı havuzu henüz hazır değil. Önce connect() çağrılmalı.');
+    throw new Error('Veritabani havuzu henüz hazir değil. Önce connect() çağrilmali.');
   }
   return pool;
 }

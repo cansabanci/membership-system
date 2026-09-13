@@ -5,43 +5,84 @@ const CURRENT_YEAR = new Date().getFullYear();
 const MIN_YEAR = 1959;
 
 // 👇 Kullanıcı rolüne göre yetkilendirme
-let currentUserRole = 'viewer'; // varsayılan olarak viewer (güvenlik amaçlı)
+// Rol, pencere ilk yüklenirken URL parametresiyle SENKRON geliyor — 'set-role' IPC mesajını
+// beklemek arada kısa bir an yanlışlıkla 'viewer' varsayılanının uygulanmasına (ör. formun
+// kilitlenmesine) yol açabiliyordu. IPC dinleyici yine de yedek olarak kalıyor.
+const roleFromUrl = new URLSearchParams(window.location.search).get('role');
+let currentUserRole = roleFromUrl || 'viewer'; // varsayılan olarak viewer (güvenlik amaçlı)
 
 ipcRenderer.on('set-role', (event, role) => {
     currentUserRole = role;
     applyRolePermissions();
 });
 
+// Sayfa ilk açılırken (üye listesi yüklenmeden önce bile) dogru rol hemen uygulansin.
+applyRolePermissions();
+
 function applyRolePermissions() {
-    if (currentUserRole === 'viewer') {
-        document.getElementById('saveButton').style.display = 'none';
-        document.getElementById('updateButton').style.display = 'none';
+    const isViewer = currentUserRole === 'viewer';
+    document.body.classList.toggle('role-viewer', isViewer);
 
-        document.querySelectorAll('.fa-edit, .fa-trash, button').forEach((btn) => {
-            btn.style.display = 'none';
-        });
+    // #memberFormPanel (Kaydet/Güncelle butonları dahil) viewer için zaten CSS ile tamamen
+    // gizleniyor (body.role-viewer #memberFormPanel { display:none }), o yüzden bu döngü ona
+    // dokunmuyor — aksi halde her tetiklendiğinde editMember()/resetForm()'un ayarladığı
+    // Kaydet/Güncelle görünürlüğünü sıfırlayıp düzenleme sırasında butonları karıştırabiliyordu.
+    // Arama/filtre alanları (toolbar), kişisel not özelliği ve tablo içindeki kontroller
+    // (aidat dönemi seçici, Detaylar/Düzenle/Sil zaten CSS ile gizleniyor) her rolde açık kalır.
+    document.querySelectorAll('input, select, textarea, button').forEach((el) => {
+        if (
+            el.closest('.toolbar') ||
+            el.closest('#noteModal') ||
+            el.closest('#photoModal') ||
+            el.closest('#memberTable') ||
+            el.closest('thead') ||
+            el.closest('#memberFormPanel') ||
+            el.closest('#viewerProfileCard') ||
+            el.closest('.toggle-member-list') ||
+            el.classList.contains('btn-note')
+        ) {
+            return;
+        }
 
-        document.querySelectorAll('input, select, textarea').forEach((input) => {
-            input.disabled = true;
-        });
-    } else if (currentUserRole === 'admin') {
-        document.getElementById('saveButton').style.display = 'inline-block';
+        if (el.tagName === 'BUTTON') {
+            el.style.display = isViewer ? 'none' : '';
+        } else {
+            el.disabled = isViewer;
+        }
+    });
 
-        document.querySelectorAll('.fa-edit, .fa-trash, button').forEach((btn) => {
-            btn.style.display = '';
-        });
+    document.querySelectorAll('.fa-edit, .fa-trash').forEach((icon) => {
+        icon.style.display = isViewer ? 'none' : '';
+    });
 
-        document.querySelectorAll('input, select, textarea').forEach((input) => {
-            input.disabled = false;
-        });
+    const listPanelSub = document.getElementById('listPanelSub');
+    if (listPanelSub) {
+        listPanelSub.textContent = isViewer ? 'Üyeleri isme göre arayın.' : 'Üyeleri arayın, aidat durumuna göre filtreleyin.';
     }
+
+    // Viewer (üye) tarafında "Üye Kayıt Sistemi" başlığı yerine sadece dernek adı görünür,
+    // ve bu başlık admin'in özelleştirdiği (localStorage'daki) başlıktan etkilenmez/düzenlenemez.
+    const editableTitle = document.getElementById('editableTitle');
+    if (editableTitle) {
+        if (isViewer) {
+            editableTitle.textContent = 'Mersin ODTÜ Mezunları Derneği';
+            editableTitle.contentEditable = 'false';
+        } else {
+            editableTitle.contentEditable = 'true';
+        }
+    }
+
+    // Pencere/görev çubuğu başlığı (işletim sisteminin gösterdiği başlık, sayfa içi başlıktan ayrı)
+    document.title = isViewer ? 'Mersin ODTÜ Mezunları Derneği' : 'Üye Kayıt Sistemi';
 }
 
-// Başlık localStorage'tan alınıyor
+// Başlık localStorage'tan alınıyor (sadece admin için — viewer sabit dernek adını görür)
 window.addEventListener('DOMContentLoaded', () => {
-    const savedTitle = localStorage.getItem('uygulamaBasligi');
-    if (savedTitle) {
-        document.getElementById('editableTitle').innerText = savedTitle;
+    if (currentUserRole !== 'viewer') {
+        const savedTitle = localStorage.getItem('uygulamaBasligi');
+        if (savedTitle) {
+            document.getElementById('editableTitle').innerText = savedTitle;
+        }
     }
 
     // Saçma tarih/yıl girişini (ör. yıl olarak "20000000") arayüz seviyesinde engelle
@@ -84,30 +125,50 @@ function saveTitle() {
     }
 }
 
-// Bölüm listesini doldur
+// Bölüm listesini doldur (hem admin formundaki #department hem profil kartındaki
+// #profileDepartment için — ikisi de aynı listeyi kullanır)
+function populateDepartmentSelect(select) {
+    const allDepartments = window.__odtuDepartments || [];
+    allDepartments.forEach((department) => {
+        const option = document.createElement('option');
+        option.value = department;
+        option.textContent = department;
+        select.appendChild(option);
+    });
+
+    const otherOption = document.createElement('option');
+    otherOption.value = 'custom';
+    otherOption.textContent = 'Diğer (Manuel Giriş)';
+    select.appendChild(otherOption);
+}
+
 fetch('../../config/departments.json')
     .then((response) => response.json())
     .then((departments) => {
-        const select = document.getElementById('department');
-        Object.keys(departments).forEach((fakulte) => {
-            departments[fakulte].forEach((department) => {
-                const option = document.createElement('option');
-                option.value = department;
-                option.textContent = department;
-                select.appendChild(option);
-            });
-        });
+        window.__odtuDepartments = Object.values(departments)
+            .flat()
+            .sort((a, b) => a.localeCompare(b, 'tr'));
 
-        const otherOption = document.createElement('option');
-        otherOption.value = 'custom';
-        otherOption.textContent = 'Diğer (Manuel Giriş)';
-        select.appendChild(otherOption);
+        populateDepartmentSelect(document.getElementById('department'));
+        const profileSelect = document.getElementById('profileDepartment');
+        if (profileSelect) populateDepartmentSelect(profileSelect);
+
+        // Profil kartı, 'get-my-profile' cevabı bu fetch'ten önce gelirse bölüm seçimini
+        // doğru uygulayabilmek için bu event'i bekler (bkz. profile.js).
+        window.dispatchEvent(new Event('departments-ready'));
     })
     .catch((error) => console.error('Bölümler yüklenirken hata oluştu:', error));
 
 function checkCustomDepartment() {
     const departmentSelect = document.getElementById('department');
     const customInput = document.getElementById('customDepartment');
+
+    customInput.style.display = departmentSelect.value === 'custom' ? 'inline-block' : 'none';
+}
+
+function checkCustomProfileDepartment() {
+    const departmentSelect = document.getElementById('profileDepartment');
+    const customInput = document.getElementById('profileCustomDepartment');
 
     customInput.style.display = departmentSelect.value === 'custom' ? 'inline-block' : 'none';
 }

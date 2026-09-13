@@ -31,18 +31,28 @@ async function buildAndSaveWorkbook() {
   const sheet = workbook.addWorksheet('Uyeler');
   sheet.columns = [
     { header: 'Ad Soyad', key: 'adsoyad' },
+    { header: 'T.C. Kimlik No', key: 'tcKimlikNo' },
+    { header: 'Cinsiyet', key: 'cinsiyet' },
+    { header: 'Doğum Tarihi', key: 'dogumTarihi' },
     { header: 'Bölüm', key: 'bolum' },
     { header: 'Mezuniyet', key: 'mezuniyet' },
+    { header: 'Öğrenim Durumu', key: 'ogrenimDurumu' },
     { header: 'Burs Miktar', key: 'bursMiktar' },
     { header: 'Burs Tip', key: 'bursTip' },
     { header: 'Email', key: 'email' },
     { header: 'Telefon', key: 'telefon' },
     { header: 'İşyeri', key: 'isyeri' },
     { header: 'Meslek', key: 'meslek' },
-    { header: 'Pozisyon', key: 'pozisyon' },
     { header: 'Şehir', key: 'sehir' },
+    { header: 'Üye Niteliği', key: 'uyeNiteligi' },
+    { header: 'Üye Türü', key: 'uyeTur' },
+    { header: 'Onursal Üye', key: 'onursalUye' },
+    { header: 'Durum', key: 'durum' },
+    { header: 'Yönetim Kurulu Karar Tarihi', key: 'yonetimKuruluKararTarihi' },
     { header: 'Üyelik Giriş', key: 'uyelikGiris' },
     { header: 'Üyelik Çıkış', key: 'uyelikCikis' },
+    { header: 'Pasif Olma Nedeni', key: 'pasifOlmaNedeni' },
+    { header: 'Pasif Olma Bildirim Tarihi', key: 'pasifOlmaBildirimTarihi' },
   ];
   rows.forEach((row) => sheet.addRow(row));
 

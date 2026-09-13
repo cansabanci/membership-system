@@ -46,7 +46,7 @@ async function runMigrations() {
     }
 
     await pool.request().input('name', sql.NVarChar, file).query('INSERT INTO migrations (name) VALUES (@name)');
-    console.log(`✅ Migration uygulandı: ${file}`);
+    console.log(`✅ Migration uygulandi: ${file}`);
   }
 }
 
