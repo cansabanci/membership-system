@@ -1,0 +1,835 @@
+* { box-sizing: border-box; }
+
+/* ---------- Viewer (uye) rolu kisitlamalari ---------- */
+body.role-viewer #memberFormPanel {
+    display: none;
+}
+
+body.role-viewer .filter-group,
+body.role-viewer .col-aidat,
+body.role-viewer .col-burs,
+body.role-viewer .col-detaylar,
+body.role-viewer .col-duzenle,
+body.role-viewer .col-geri-al,
+body.role-viewer .col-sil {
+    display: none;
+}
+
+/* Profil karti sadece viewer'a gorunur — admin'in kendi kaydi olmadigi icin anlamsiz. */
+#viewerProfileCard {
+    display: none;
+}
+
+body.role-viewer #viewerProfileCard {
+    display: flex;
+}
+
+/* "Uye listesini goster" toggle'i sadece viewer icin anlamli — admin tabloyu her zaman gorur. */
+body:not(.role-viewer) .toggle-member-list {
+    display: none;
+}
+
+body {
+    font-family: var(--font-ui);
+    background-color: var(--paper);
+    margin: 0;
+    padding: 0 0 40px;
+    color: var(--ink);
+    font-size: 14px;
+}
+
+/* ---------- Topbar ---------- */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    background: linear-gradient(120deg, var(--ink) 0%, #1c2740 60%, var(--sea-deep) 130%);
+    padding: 16px 32px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 16px -8px rgba(20, 27, 46, 0.4);
+}
+
+.topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.topbar-actions .btn-ghost {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.brand-logo {
+    height: 52px;
+    width: 52px;
+    border-radius: 50%;
+    background: #fff;
+    padding: 3px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--red);
+    background: rgba(255, 255, 255, 0.92);
+    padding: 2px 8px;
+    border-radius: 4px;
+    width: fit-content;
+}
+
+#editableTitle {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 700;
+    color: #fff;
+    margin: 4px 0 0;
+    line-height: 1.25;
+}
+
+#editableTitle:focus {
+    outline: 1px dashed rgba(255, 255, 255, 0.5);
+    outline-offset: 4px;
+}
+
+.brand-flag {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    flex-shrink: 0;
+}
+
+/* ---------- Banners ---------- */
+.error-banner,
+.backup-banner {
+    display: none;
+    max-width: 1180px;
+    margin: 0 auto 20px;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.error-banner {
+    background: var(--bad-soft);
+    color: var(--bad);
+    border: 1px solid rgba(200, 16, 46, 0.25);
+}
+
+.backup-banner {
+    background: var(--sea-soft);
+    color: var(--sea-deep);
+    border: 1px solid rgba(15, 111, 158, 0.25);
+    text-align: center;
+}
+
+/* ---------- Layout ---------- */
+.content {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.panel {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--line);
+    padding: 26px 28px 28px;
+}
+
+.panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+}
+
+.panel-head h2 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 3px;
+    color: var(--ink);
+}
+
+.panel-sub {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* ---------- Form sections ---------- */
+.form-section + .form-section {
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--line);
+}
+
+.section-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--sea-deep);
+    margin: 0 0 14px;
+}
+
+.section-label i {
+    color: var(--sea);
+    font-size: 13px;
+}
+
+.field-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group.compact {
+    min-width: 140px;
+}
+
+.form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+}
+
+input,
+select {
+    font-family: var(--font-ui);
+    padding: 9px 11px;
+    font-size: 13.5px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--paper);
+    color: var(--ink);
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--sea);
+    box-shadow: 0 0 0 3px var(--sea-soft);
+    background: var(--surface);
+}
+
+input:disabled,
+select:disabled {
+    background: var(--line);
+    color: var(--muted);
+    cursor: not-allowed;
+}
+
+input[type="checkbox"] {
+    accent-color: var(--sea);
+    width: 16px;
+    height: 16px;
+}
+
+/* ---------- Buttons ---------- */
+button {
+    font-family: var(--font-ui);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, transform 0.05s;
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+.btn-primary {
+    background: var(--red);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: var(--red-deep);
+}
+
+.btn-secondary {
+    background: var(--sea);
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background: var(--sea-deep);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+}
+
+.btn-ghost:hover {
+    background: var(--paper);
+}
+
+.btn-detail {
+    background: var(--paper);
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    font-size: 12.5px;
+}
+
+.btn-detail:hover {
+    background: var(--line);
+}
+
+.panel-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+}
+
+/* ---------- Aidat picker (chip list) ---------- */
+.aidat-picker {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.check-field {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    padding-bottom: 9px;
+}
+
+.aidat-mini-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.aidat-mini-table thead {
+    display: none;
+}
+
+.aidat-mini-table tbody {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.aidat-mini-table tbody:empty::after {
+    content: "Henüz aidat dönemi eklenmedi.";
+    display: block;
+    font-size: 12.5px;
+    color: var(--muted);
+    font-style: italic;
+}
+
+.aidat-mini-table tr {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--sea-soft);
+    border: 1px solid rgba(15, 111, 158, 0.18);
+    border-radius: 999px;
+    padding: 6px 8px 6px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--sea-deep);
+}
+
+.aidat-mini-table td {
+    padding: 0;
+    border: none;
+}
+
+.aidat-mini-table .remove-button {
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    opacity: 0.7;
+}
+
+.aidat-mini-table .remove-button:hover {
+    opacity: 1;
+}
+
+/* ---------- Member list toolbar ---------- */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.search-box {
+    position: relative;
+    flex: 1 1 240px;
+    max-width: 320px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 12.5px;
+}
+
+.search-box input {
+    width: 100%;
+    padding-left: 32px;
+}
+
+.filter-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ---------- Data table ---------- */
+.table-scroll {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--line);
+}
+
+table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--surface);
+}
+
+.data-table th {
+    background-color: var(--ink);
+    color: #fff;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 12px 14px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.data-table td {
+    border-bottom: 1px solid var(--line);
+    padding: 10px 14px;
+    text-align: center;
+    font-size: 13.5px;
+}
+
+.data-table tbody tr.main-row:hover {
+    background-color: var(--paper);
+}
+
+.profile-img {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--sea-soft);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    cursor: pointer;
+}
+
+.profile-img:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.photo-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 20, 35, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.photo-modal {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 45px -20px rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.photo-modal img {
+    max-width: 70vw;
+    max-height: 70vh;
+    border-radius: var(--radius-sm);
+    object-fit: contain;
+}
+
+.photo-modal h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--ink);
+}
+
+.icon-btn {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    transition: background-color 0.15s;
+}
+
+.icon-btn-edit {
+    color: var(--sea);
+}
+
+.icon-btn-edit:hover {
+    background: var(--sea-soft);
+}
+
+.icon-btn-delete {
+    color: var(--bad);
+}
+
+.icon-btn-delete:hover {
+    background: var(--bad-soft);
+}
+
+.icon-btn-rollback {
+    color: var(--muted);
+}
+
+.icon-btn-rollback:hover {
+    background: var(--paper);
+    color: var(--ink);
+}
+
+.detay-row {
+    background-color: var(--paper);
+    font-size: 13px;
+}
+
+.btn-note {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.btn-note:hover {
+    background: var(--sea-soft);
+    border-color: var(--sea);
+}
+
+.btn-note.has-note {
+    background: var(--sea-soft);
+    border-color: var(--sea);
+    color: var(--sea);
+}
+
+.note-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 20, 35, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.note-modal {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 45px -20px rgba(0, 0, 0, 0.5);
+    padding: 26px 28px;
+    width: 420px;
+    max-width: 90vw;
+}
+
+.note-modal h3 {
+    margin: 0 0 4px;
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--ink);
+}
+
+.note-modal .panel-sub {
+    margin: 0 0 16px;
+}
+
+.note-modal textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    background: var(--paper);
+    resize: vertical;
+}
+
+.note-modal textarea:focus {
+    outline: none;
+    border-color: var(--sea);
+    box-shadow: 0 0 0 3px var(--sea-soft);
+    background: var(--surface);
+}
+
+.note-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.detay-row td {
+    padding: 4px 18px 16px;
+    border-top: none;
+    text-align: left;
+}
+
+.detay-row strong {
+    color: var(--ink-soft);
+}
+
+/* ---------- Footer ---------- */
+#footer {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 40px;
+    padding: 18px 0 0;
+}
+
+/* ---------- Viewer profil karti ---------- */
+.profile-card-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 28px;
+    flex-wrap: wrap;
+}
+
+.profile-card-photo-col {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 220px;
+    flex-shrink: 0;
+}
+
+.profile-card-head {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+}
+
+.profile-card-photo {
+    width: 220px;
+    height: 260px;
+    object-fit: cover;
+    border-radius: 24px;
+    border: 3px solid var(--sea-soft);
+    background: var(--paper);
+}
+
+.profile-card-photo-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.profile-card-photo-actions label.btn-secondary {
+    cursor: pointer;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+}
+
+.profile-card-photo-actions .btn-ghost {
+    width: 100%;
+    justify-content: center;
+}
+
+.profile-card-info {
+    flex: 1;
+    min-width: 280px;
+}
+
+.profile-card-readonly {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 22px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed var(--line);
+}
+
+.profile-card-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.profile-card-row--pills {
+    align-items: flex-start;
+}
+
+.profile-card-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--sea-deep);
+    min-width: 120px;
+}
+
+.profile-card-value {
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.profile-card-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.aidat-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.aidat-pill--paid {
+    background: var(--good-soft);
+    color: var(--good);
+}
+
+.aidat-pill--unpaid {
+    background: var(--bad-soft);
+    color: var(--bad);
+}
+
+.profile-save-message {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--good);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    align-self: center;
+}
+
+.profile-save-message--visible {
+    opacity: 1;
+}
+
+/* ---------- Uye listesi: sira no / siralama / bolum filtresi ---------- */
+.col-rowno {
+    width: 36px;
+    text-align: center;
+    color: var(--muted);
+}
+
+.sortable-th {
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+}
+
+.sortable-th:hover {
+    background-color: var(--ink-soft);
+}
+
+.sortable-th i {
+    margin-left: 4px;
+}
+
+.dept-filter-active {
+    color: var(--sea-soft);
+}
+
+.dept-filter-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 4px;
+    z-index: 20;
+    text-transform: none;
+    font-weight: 500;
+    letter-spacing: normal;
+    min-width: 160px;
+}
+
+.toggle-member-list {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+}

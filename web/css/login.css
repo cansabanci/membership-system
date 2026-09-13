@@ -1,0 +1,213 @@
+* { box-sizing: border-box; }
+
+body {
+    font-family: var(--font-ui);
+    background: linear-gradient(160deg, var(--ink) 0%, #1c2740 45%, var(--sea-deep) 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.login-shell {
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+}
+
+.login-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+}
+
+.login-brand img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #fff;
+    padding: 4px;
+    box-shadow: var(--shadow-card);
+}
+
+.login-brand h1 {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    line-height: 1.35;
+}
+
+.login-brand span {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.login-container {
+    background-color: var(--surface);
+    padding: 32px 30px;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 45px -20px rgba(0, 0, 0, 0.5);
+    width: 100%;
+}
+
+.login-container h2 {
+    text-align: left;
+    margin: 0 0 4px;
+    font-family: var(--font-display);
+    font-size: 20px;
+    color: var(--ink);
+}
+
+.login-container .sub {
+    margin: 0 0 22px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.field {
+    margin-bottom: 14px;
+}
+
+.field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
+    font-size: 14px;
+    font-family: var(--font-ui);
+    background: var(--paper);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.login-container input:focus {
+    outline: none;
+    border-color: var(--sea);
+    box-shadow: 0 0 0 3px var(--sea-soft);
+    background: var(--surface);
+}
+
+.login-container button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    background-color: var(--red);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.login-container button:hover {
+    background-color: var(--red-deep);
+}
+
+.remember-field {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.remember-field input {
+    width: auto;
+    padding: 0;
+    accent-color: var(--red);
+}
+
+.error-message {
+    color: var(--bad);
+    background: var(--bad-soft);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    margin-top: 14px;
+    display: none;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.success-message {
+    color: var(--good, #1a7f37);
+    background: var(--good-soft, #e6f4ea);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    margin-top: 14px;
+    display: none;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.switch-link {
+    margin: 16px 0 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+}
+
+.switch-link a {
+    color: var(--sea);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.switch-link a:hover {
+    text-decoration: underline;
+}
+
+.password-hint {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.password-hint li {
+    font-size: 12px;
+    color: var(--muted);
+    position: relative;
+    padding-left: 16px;
+}
+
+.password-hint li::before {
+    content: '○';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+}
+
+.password-hint li.met {
+    color: var(--good, #1a7f37);
+}
+
+.password-hint li.met::before {
+    content: '✓';
+    color: var(--good, #1a7f37);
+}
