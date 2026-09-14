@@ -22,6 +22,10 @@ function onAppReady(fn) {
 
 function applyRolePermissions() {
     const isViewer = currentUserRole === 'viewer';
+    // "role-pending" (bkz. index.html <body>): rol sunucudan gelip kesinlesene kadar admin-only
+    // alanlar CSS'te guvenli varsayilan olarak gizli baslar — bu satirla o "beklemede" durumu
+    // sona eriyor, admin ise (role-pending de role-viewer de yokken) form/sutunlar gorunur olur.
+    document.body.classList.remove('role-pending');
     document.body.classList.toggle('role-viewer', isViewer);
 
     // #memberFormPanel (Kaydet/Güncelle butonları dahil) viewer için zaten CSS ile tamamen

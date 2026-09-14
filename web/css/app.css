@@ -1,16 +1,30 @@
 * { box-sizing: border-box; }
 
 /* ---------- Viewer (uye) rolu kisitlamalari ---------- */
+/* Guvenli varsayilan: rol henuz bilinmiyorken (body.role-pending — JS /api/auth/me cevabini
+   bekliyorken) admin-only alanlar GIZLI baslar, sadece rol "admin" oldugu KESINLESINCE
+   (ui.js'te role-pending kaldirilinca) gosterilir. Eskiden bu sadece "viewer ise gizle"
+   seklindeydi — yani rol belirlenene kadar (ozellikle yavas mobil baglantilarda gozle
+   gorulur bir sure) admin formu/sutunlari varsayilan olarak GORUNURDU (gercek bir yetki
+   acigi degil, backend zaten requireAdmin ile korunuyordu, ama kafa karistiran bir "flash").*/
+body.role-pending #memberFormPanel,
 body.role-viewer #memberFormPanel {
     display: none;
 }
 
+body.role-pending .filter-group,
 body.role-viewer .filter-group,
+body.role-pending .col-aidat,
 body.role-viewer .col-aidat,
+body.role-pending .col-burs,
 body.role-viewer .col-burs,
+body.role-pending .col-detaylar,
 body.role-viewer .col-detaylar,
+body.role-pending .col-duzenle,
 body.role-viewer .col-duzenle,
+body.role-pending .col-geri-al,
 body.role-viewer .col-geri-al,
+body.role-pending .col-sil,
 body.role-viewer .col-sil {
     display: none;
 }
