@@ -4,7 +4,9 @@ const path = require('path');
 function savePhotoFromDataUrl(photosDir, dataUrl) {
   const match = dataUrl.match(/^data:image\/(\w+);base64,/);
   if (!match) {
-    throw new Error('Geçersiz fotoğraf formatı.');
+    const err = new Error('Geçersiz fotoğraf formatı.');
+    err.status = 400;
+    throw err;
   }
 
   const ext = match[1];
