@@ -53,9 +53,22 @@ function createApp() {
   app.use('/api/profile', doubleCsrfProtection, profileRoutes);
   app.use('/api/photos', photosRoutes);
 
-  // Temiz URL'ler: "/login.html" yerine "/login" — express.static zaten "/" icin index.html'i
-  // otomatik veriyor (varsayilan davranis), "/login" icin ayni eslemeyi elle ekliyoruz.
-  app.get('/login', (req, res) => res.sendFile(path.join(__dirname, '..', 'web', 'login.html')));
+  // "/" ve "/login" icin oturum durumu sayfa GONDERILMEDEN ONCE kontrol edilir — eskiden
+  // index.html once oldugu gibi yollanip, oturumsuz oldugu JS tarafinda /api/auth/me ile
+  // ANLASILDIKTAN SONRA /login'e yonlendiriliyordu, bu da kisa bir an bos/yanlis ekranin
+  // gorunmesine sebep oluyordu. Sadece bu iki sayfa icin sessionMiddleware kullaniliyor
+  // (rolling idle timeout acisindan gercek bir sayfa ziyareti sayilmasi zaten dogru davranis —
+  // arka plandaki css/js/resim istekleri gibi degil, bkz. asagidaki express.static yorumu).
+  app.get('/', sessionMiddleware, (req, res) => {
+    if (!req.session || !req.session.userId) return res.redirect('/login');
+    res.sendFile(path.join(__dirname, '..', 'web', 'index.html'));
+  });
+
+  // Temiz URL'ler: "/login.html" yerine "/login".
+  app.get('/login', sessionMiddleware, (req, res) => {
+    if (req.session && req.session.userId) return res.redirect('/');
+    res.sendFile(path.join(__dirname, '..', 'web', 'login.html'));
+  });
 
   // Faz 2: web arayuzu (statik dosyalar) + paylasilan kok-dizin varliklari (images/, config/)
   app.use(express.static(path.join(__dirname, '..', 'web')));
