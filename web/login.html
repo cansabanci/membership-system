@@ -58,11 +58,11 @@
                     <p class="sub" id="registerOtpHint"></p>
                     <div class="field">
                         <label for="regOtp">Doğrulama Kodu</label>
-                        <input type="text" id="regOtp" placeholder="6 haneli kod" maxlength="6" inputmode="numeric">
+                        <input type="text" id="regOtp" placeholder="6 haneli kod" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
                     </div>
                     <div class="field">
                         <label for="regPassword">Şifre</label>
-                        <input type="password" id="regPassword" placeholder="Şifrenizi belirleyin">
+                        <input type="password" id="regPassword" placeholder="Şifrenizi belirleyin" autocomplete="new-password">
                         <ul class="password-hint" id="passwordHint">
                             <li id="hintLength">En az 8 karakter</li>
                             <li id="hintLower">En az bir küçük harf</li>
@@ -73,7 +73,7 @@
                     </div>
                     <div class="field">
                         <label for="regPasswordConfirm">Şifre Tekrar</label>
-                        <input type="password" id="regPasswordConfirm" placeholder="Şifrenizi tekrar girin">
+                        <input type="password" id="regPasswordConfirm" placeholder="Şifrenizi tekrar girin" autocomplete="new-password">
                     </div>
                     <p class="switch-link"><a href="#" onclick="resendRegisterOtp(); return false;">Kodu Tekrar Gönder</a></p>
                 </div>
@@ -102,11 +102,11 @@
                     <p class="sub" id="resetOtpHint"></p>
                     <div class="field">
                         <label for="resetOtp">Doğrulama Kodu</label>
-                        <input type="text" id="resetOtp" placeholder="6 haneli kod" maxlength="6" inputmode="numeric">
+                        <input type="text" id="resetOtp" placeholder="6 haneli kod" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
                     </div>
                     <div class="field">
                         <label for="resetPassword">Yeni Şifre</label>
-                        <input type="password" id="resetPassword" placeholder="Yeni şifrenizi belirleyin">
+                        <input type="password" id="resetPassword" placeholder="Yeni şifrenizi belirleyin" autocomplete="new-password">
                         <ul class="password-hint" id="resetPasswordHint">
                             <li id="resetHintLength">En az 8 karakter</li>
                             <li id="resetHintLower">En az bir küçük harf</li>
@@ -117,7 +117,7 @@
                     </div>
                     <div class="field">
                         <label for="resetPasswordConfirm">Yeni Şifre Tekrar</label>
-                        <input type="password" id="resetPasswordConfirm" placeholder="Yeni şifrenizi tekrar girin">
+                        <input type="password" id="resetPasswordConfirm" placeholder="Yeni şifrenizi tekrar girin" autocomplete="new-password">
                     </div>
                     <p class="switch-link"><a href="#" onclick="resendResetOtp(); return false;">Kodu Tekrar Gönder</a></p>
                 </div>
