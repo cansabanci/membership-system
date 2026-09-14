@@ -14,6 +14,7 @@ function setProfilePhoto(photoUrl) {
         img.removeAttribute('src');
         img.style.display = 'none';
     }
+    document.getElementById('profilePhotoUploadLabel').textContent = photoUrl ? 'Fotoğraf Değiştir' : 'Fotoğraf Ekle';
 }
 
 function renderAidatPills(member) {
