@@ -232,6 +232,7 @@ function resetForm() {
     document.getElementById('pasifOlmaBildirimTarihi').value = '';
     document.getElementById('saveButton').style.display = 'inline-block';
     document.getElementById('updateButton').style.display = 'none';
+    document.getElementById('cancelButton').style.display = 'none';
 }
 
 function editMember(member) {
@@ -310,6 +311,12 @@ function editMember(member) {
 
     document.getElementById('saveButton').style.display = 'none';
     document.getElementById('updateButton').style.display = 'inline-block';
+    document.getElementById('cancelButton').style.display = 'inline-block';
+
+    // Formu doldurduktan sonra kullanıcıyı otomatik olarak en üstteki forma taşı — aksi halde
+    // uzun bir listede aşağıdaki bir satırdan Düzenle'ye basınca form görünmüyor, elle yukarı
+    // kaydırmak gerekiyordu.
+    document.getElementById('memberFormPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // Detay satırı innerHTML ile kuruluyor — üye alanlarının bir kısmı (email, telefon, meslek,

@@ -217,5 +217,5 @@ async function logout() {
     } catch {
         // oturum zaten gecersizse de login'e don
     }
-    window.location.href = 'login.html';
+    window.location.href = '/login';
 }

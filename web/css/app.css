@@ -437,8 +437,13 @@ button:active {
 }
 
 /* ---------- Data table ---------- */
+/* max-height + overflow-y: tablo uzun oldugunda (200+ satir) yatay kaydirma cubugu sayfanin
+   en altina itiliyordu — onu gormek icin tum listeyi kaydirmak gerekiyordu. Artik tablonun
+   kendi ic dikey kaydirmasi var, yatay cubuk her zaman görünür/erisilebilir kaliyor. */
 .table-scroll {
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 65vh;
     border-radius: var(--radius-md);
     border: 1px solid var(--line);
 }
@@ -459,6 +464,9 @@ table.data-table {
     padding: 12px 14px;
     text-align: center;
     white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
 .data-table td {
