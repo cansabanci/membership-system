@@ -912,6 +912,11 @@ table.data-table {
     }
 
     .profile-card-info {
+        /* Masaustu kuralindaki "flex: 1" (flex-basis: 0%) yuzunden flexbox bu ogeyi yeni
+           satira atmak yerine kalan birkaç piksellik bosluga sikistiriyordu (flex-basis:0 +
+           min-width:0 => her zaman "sigiyor" sayiliyor, hic sarmiyordu). flex-basis'i %100
+           yaparak satiri fiilen doldurup alt satira gecmesini garantiliyoruz. */
+        flex: 1 1 100%;
         min-width: 0;
         width: 100%;
     }
