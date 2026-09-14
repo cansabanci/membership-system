@@ -132,6 +132,17 @@ async function getAllMembers() {
   return result.recordset;
 }
 
+// "Üye rehberi" (viewer'ların birbirini görebildiği) özelliği için — kasıtlı olarak dar bir
+// alan seti: TC no, doğum tarihi, telefon, e-posta, aidat/burs gibi hassas alanlar HİÇBİR ZAMAN
+// bu sorguya eklenmemeli (bkz. GET /api/members/directory route'undaki yorum).
+async function getDirectoryMembers() {
+  const pool = getPool();
+  const result = await pool
+    .request()
+    .query(`SELECT id, adsoyad, bolum, mezuniyet, meslek, isyeri, sehir, photo FROM uyeler WHERE durum='Aktif' ORDER BY adsoyad`);
+  return result.recordset;
+}
+
 async function getAidatlarForMember(uyeId) {
   const pool = getPool();
   const result = await pool
@@ -168,6 +179,7 @@ module.exports = {
   replaceAidatlar,
   getMemberById,
   getAllMembers,
+  getDirectoryMembers,
   getAidatlarForMember,
   getAllAidatlar,
   getMemberPhoto,

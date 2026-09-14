@@ -602,15 +602,32 @@ async function loadMembers() {
     }
 }
 
+// Viewer'lar için: TC no/doğum tarihi/telefon/e-posta/aidat İÇERMEYEN dar bir "üye rehberi"
+// (bkz. GET /api/members/directory). Aynı tablo/arama/filtre altyapısını (applyMemberView,
+// addMemberToTable) yeniden kullanmak için eksik alanlar zararsız boş değerlerle dolduruluyor —
+// bu alanlara karşılık gelen sütunlar zaten CSS ile (.col-aidat/.col-burs vb.) viewer'dan gizli.
+async function loadDirectory() {
+    try {
+        const members = await apiFetch('GET', '/api/members/directory');
+        allMembers = members.map((m) => ({
+            ...m,
+            donemler: [],
+            donemler_odendi: [],
+            bursMiktar: 0,
+            bursTip: '-',
+        }));
+        applyMemberView();
+    } catch (err) {
+        showErrorBanner(err.message);
+    }
+}
+
 // Eskiden script yüklenir yüklenmez çalışırdı; artık oturum bootstrap'i (ui.js) bitip
 // gerçek rol bilindikten sonra çalışması gerekiyor (bkz. onAppReady, ui.js).
 onAppReady(() => {
     if (currentUserRole === 'viewer') {
-        // GET /api/members artık sadece admin'e açık (tüm üyelerin TC no/doğum tarihi/telefon/
-        // e-posta/aidat bilgisini döndüğü için) — viewer için bu bölüm geçici olarak gizli.
         document.getElementById('memberListBody').style.display = 'none';
-        const toggle = document.querySelector('.toggle-member-list');
-        if (toggle) toggle.style.display = 'none';
+        loadDirectory();
         return;
     }
     loadMembers();

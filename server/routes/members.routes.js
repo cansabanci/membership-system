@@ -6,10 +6,26 @@ const { savePhotoFromDataUrl, deletePhotoFile, resolvePhotoPath } = require('../
 const { toDurumListesi } = require('../../src/main/utils/aidatUtils');
 const { toPhotoUrl } = require('../utils/photoUrl');
 const asyncHandler = require('../utils/asyncHandler');
-const { requireAdmin } = require('../middleware/auth');
+const { requireAuth, requireAdmin } = require('../middleware/auth');
 const config = require('../config/env');
 
 const router = express.Router();
+
+// "Üye rehberi" — herhangi bir giriş yapmış kullanıcı (viewer dahil) diğer üyeleri görebilir,
+// ama SADECE memberRepository.getDirectoryMembers'taki dar alan setiyle (isim/bölüm/mezuniyet/
+// meslek/işyeri/şehir/fotoğraf). TC no, doğum tarihi, telefon, e-posta, aidat ASLA buraya
+// eklenmemeli — GET /'deki tam liste bilerek requireAdmin ile korunuyor (bkz. o route'un yorumu).
+router.get(
+  '/directory',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const members = await memberRepository.getDirectoryMembers();
+    for (const uye of members) {
+      if (uye.photo) uye.photo = toPhotoUrl(uye.photo);
+    }
+    res.json(members);
+  })
+);
 
 router.get(
   '/',
