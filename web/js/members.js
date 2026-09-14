@@ -132,22 +132,51 @@ function readPhotoAsDataUrl(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
+            const rawResult = reader.result;
+            // Bazı (özellikle düşük donanımlı/eski Android) cihazlarda canvas ile büyük
+            // görsel işleme donup hiç bitmeyebiliyor — img.onload/onerror hiç tetiklenmiyor,
+            // "Kaydet" sonsuza kadar bekliyor, ne istek gidiyor ne hata görünüyor (gerçek bir
+            // vakada gözlemlendi). Bu yüzden 6 saniyelik bir güvenlik süresi var: sıkıştırma
+            // bu sürede bitmezse ham veriyle devam ediyoruz, kullanıcı hiçbir zaman sonsuza
+            // kadar beklemiyor.
+            let settled = false;
+            const fallbackTimer = setTimeout(() => {
+                if (settled) return;
+                settled = true;
+                resolve(rawResult);
+            }, 6000);
+
             const img = new Image();
             img.onload = () => {
-                let { width, height } = img;
-                if (width > PHOTO_MAX_DIMENSION || height > PHOTO_MAX_DIMENSION) {
-                    const scale = PHOTO_MAX_DIMENSION / Math.max(width, height);
-                    width = Math.round(width * scale);
-                    height = Math.round(height * scale);
+                if (settled) return;
+                try {
+                    let { width, height } = img;
+                    if (width > PHOTO_MAX_DIMENSION || height > PHOTO_MAX_DIMENSION) {
+                        const scale = PHOTO_MAX_DIMENSION / Math.max(width, height);
+                        width = Math.round(width * scale);
+                        height = Math.round(height * scale);
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    const compressed = canvas.toDataURL('image/jpeg', PHOTO_JPEG_QUALITY);
+                    settled = true;
+                    clearTimeout(fallbackTimer);
+                    resolve(compressed);
+                } catch {
+                    settled = true;
+                    clearTimeout(fallbackTimer);
+                    resolve(rawResult); // sıkıştırma sırasında herhangi bir hata olursa ham veriyle devam et
                 }
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                resolve(canvas.toDataURL('image/jpeg', PHOTO_JPEG_QUALITY));
             };
-            img.onerror = () => resolve(reader.result); // sıkıştırma başarısız olursa ham veriyle devam et
-            img.src = reader.result;
+            img.onerror = () => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(fallbackTimer);
+                resolve(rawResult); // sıkıştırma başarısız olursa ham veriyle devam et
+            };
+            img.src = rawResult;
         };
         reader.onerror = () => reject(reader.error);
         reader.readAsDataURL(file);
