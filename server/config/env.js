@@ -16,4 +16,8 @@ module.exports = {
   COOKIE_SECURE: process.env.COOKIE_SECURE === 'true',
   CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173',
   PHOTOS_DIR: process.env.PHOTOS_DIR || path.join(__dirname, '..', 'uploads', 'photos'),
+  // VPS'te Nginx/Caddy gibi bir reverse proxy'nin ARDINDA calisirken sart: yoksa Express
+  // req.ip'yi her zaman proxy'nin adresi sanir ve IP-bazli rate limiter (rateLimit.js) islevsiz
+  // kalir. Kac proxy hop'u varsa o sayi (VPS'te tipik olarak Nginx = 1 hop).
+  TRUST_PROXY: parseInt(process.env.TRUST_PROXY, 10) || 0,
 };

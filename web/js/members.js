@@ -606,7 +606,12 @@ async function loadMembers() {
 // gerçek rol bilindikten sonra çalışması gerekiyor (bkz. onAppReady, ui.js).
 onAppReady(() => {
     if (currentUserRole === 'viewer') {
+        // GET /api/members artık sadece admin'e açık (tüm üyelerin TC no/doğum tarihi/telefon/
+        // e-posta/aidat bilgisini döndüğü için) — viewer için bu bölüm geçici olarak gizli.
         document.getElementById('memberListBody').style.display = 'none';
+        const toggle = document.querySelector('.toggle-member-list');
+        if (toggle) toggle.style.display = 'none';
+        return;
     }
     loadMembers();
 });

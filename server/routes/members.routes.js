@@ -6,14 +6,14 @@ const { savePhotoFromDataUrl, deletePhotoFile, resolvePhotoPath } = require('../
 const { toDurumListesi } = require('../../src/main/utils/aidatUtils');
 const { toPhotoUrl } = require('../utils/photoUrl');
 const asyncHandler = require('../utils/asyncHandler');
-const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { requireAdmin } = require('../middleware/auth');
 const config = require('../config/env');
 
 const router = express.Router();
 
 router.get(
   '/',
-  requireAuth,
+  requireAdmin,
   asyncHandler(async (req, res) => {
     const [members, tumAidatlar] = await Promise.all([memberRepository.getAllMembers(), memberRepository.getAllAidatlar()]);
 

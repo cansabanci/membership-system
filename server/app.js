@@ -18,6 +18,11 @@ const photosRoutes = require('./routes/photos.routes');
 function createApp() {
   const app = express();
 
+  // VPS'te reverse proxy ardinda calisirken TRUST_PROXY=1 (Nginx=1 hop) set edilmeli — yoksa
+  // req.ip her zaman proxy adresi olur ve rateLimit.js'teki IP-bazli limit islevsiz kalir.
+  // Yerelde (proxy yokken) 0 kalir, express-rate-limit'in X-Forwarded-For hatasi vermez.
+  if (config.TRUST_PROXY > 0) app.set('trust proxy', config.TRUST_PROXY);
+
   // Faz 2 web arayuzu mevcut HTML'i (inline onclick="..." vb.) minimal degisiklikle
   // yeniden kullaniyor — helmet'in varsayilan CSP'si script-src-attr'i 'none' yapip
   // bunlarin hepsini sessizce engelliyordu, o yuzden sadece bu directive'i gevsetiyoruz.
