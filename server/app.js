@@ -53,6 +53,10 @@ function createApp() {
   app.use('/api/profile', doubleCsrfProtection, profileRoutes);
   app.use('/api/photos', photosRoutes);
 
+  // Temiz URL'ler: "/login.html" yerine "/login" — express.static zaten "/" icin index.html'i
+  // otomatik veriyor (varsayilan davranis), "/login" icin ayni eslemeyi elle ekliyoruz.
+  app.get('/login', (req, res) => res.sendFile(path.join(__dirname, '..', 'web', 'login.html')));
+
   // Faz 2: web arayuzu (statik dosyalar) + paylasilan kok-dizin varliklari (images/, config/)
   app.use(express.static(path.join(__dirname, '..', 'web')));
   app.use('/images', express.static(path.join(__dirname, '..', 'images')));

@@ -41,7 +41,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     try {
         await apiFetch('POST', '/api/auth/login', { email, password });
-        window.location.href = 'index.html';
+        window.location.href = '/';
     } catch (err) {
         showError(err.message || 'Geçersiz e-posta veya şifre.');
     }

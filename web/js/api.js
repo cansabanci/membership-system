@@ -25,7 +25,7 @@ async function apiFetch(method, path, body) {
     // disindaki her istekte otomatik login'e don (auth route'lari kendi 401 mesajini
     // (yanlis sifre, vb.) inline gostermesi gerektigi icin bu yonlendirmeden haric tutulur).
     if (response.status === 401 && !path.startsWith('/api/auth/')) {
-        window.location.href = 'login.html';
+        window.location.href = '/login';
         throw new Error('Oturum süresi doldu, giriş sayfasına yönlendiriliyorsunuz.');
     }
 

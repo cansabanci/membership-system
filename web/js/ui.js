@@ -174,7 +174,7 @@ function showErrorBanner(message) {
     try {
         me = await apiFetch('GET', '/api/auth/me');
     } catch {
-        window.location.href = 'login.html';
+        window.location.href = '/login';
         return;
     }
 
