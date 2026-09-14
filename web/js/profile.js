@@ -122,6 +122,10 @@ async function saveProfile() {
         const updated = await apiFetch('PUT', '/api/profile', payload);
         if (updated) {
             fillProfileCard(updated);
+            // Alttaki "Kayıtlı Üyeler" rehberi sayfa yüklenirken bir kez çekilip JS'te
+            // önbelleklenmiş oluyor — profil (özellikle fotoğraf) güncellenince o liste de
+            // yeniden çekilmezse kullanıcı sayfayı yenileyene kadar eski halini görüyordu.
+            if (currentUserRole === 'viewer') loadDirectory();
             const msg = document.getElementById('profileSaveMessage');
             msg.textContent = 'Bilgileriniz güncellendi.';
             msg.classList.add('profile-save-message--visible');
