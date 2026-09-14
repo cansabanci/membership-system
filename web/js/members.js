@@ -312,6 +312,16 @@ function editMember(member) {
     document.getElementById('updateButton').style.display = 'inline-block';
 }
 
+// Detay satırı innerHTML ile kuruluyor — üye alanlarının bir kısmı (email, telefon, meslek,
+// işyeri, şehir) viewer'ın kendi profilinden değiştirebildiği alanlar, bu yüzden ham HTML
+// olarak basmak stored XSS'e açık olurdu (kötü niyetli bir viewer kendi profiline <script>/
+// onerror gibi bir payload koyup admin "Detaylar"ı açtığında admin oturumunda çalıştırabilirdi).
+function escapeHtml(value) {
+    const div = document.createElement('div');
+    div.textContent = value ?? '';
+    return div.innerHTML;
+}
+
 function addMemberToTable(member, rowNumber, initialDonemIndex) {
     const table = document.getElementById('memberTable');
 
@@ -445,21 +455,21 @@ function addMemberToTable(member, rowNumber, initialDonemIndex) {
     detayCell.colSpan = 13;
     detayCell.innerHTML = `
         <div style="text-align: left; padding: 10px;">
-            <strong>📧 Mail:</strong> ${member.email || '-'}<br>
-            <strong>📱 Telefon:</strong> ${member.telefon || '-'}<br>
-            <strong>🏢 İş Yeri:</strong> ${member.isyeri || '-'}<br>
-            <strong>👨‍🔧 Meslek:</strong> ${member.meslek || '-'}<br>
-            <strong>🌍 Şehir:</strong> ${member.sehir || '-'}<br>
-            <strong>📅 Üyelik Tarihleri:</strong> ${member.uyelikGiris || '-'} / ${member.uyelikCikis || '-'}<br>
-            <strong>🆔 T.C. Kimlik No:</strong> ${member.tcKimlikNo || '-'}<br>
-            <strong>⚧ Cinsiyet:</strong> ${member.cinsiyet || '-'}<br>
-            <strong>🎂 Doğum Tarihi:</strong> ${member.dogumTarihi || '-'}<br>
-            <strong>🎓 Öğrenim Durumu:</strong> ${member.ogrenimDurumu || '-'}<br>
-            <strong>🧾 Üye Niteliği / Türü:</strong> ${member.uyeNiteligi || '-'} / ${member.uyeTur || '-'}<br>
+            <strong>📧 Mail:</strong> ${escapeHtml(member.email || '-')}<br>
+            <strong>📱 Telefon:</strong> ${escapeHtml(member.telefon || '-')}<br>
+            <strong>🏢 İş Yeri:</strong> ${escapeHtml(member.isyeri || '-')}<br>
+            <strong>👨‍🔧 Meslek:</strong> ${escapeHtml(member.meslek || '-')}<br>
+            <strong>🌍 Şehir:</strong> ${escapeHtml(member.sehir || '-')}<br>
+            <strong>📅 Üyelik Tarihleri:</strong> ${escapeHtml(member.uyelikGiris || '-')} / ${escapeHtml(member.uyelikCikis || '-')}<br>
+            <strong>🆔 T.C. Kimlik No:</strong> ${escapeHtml(member.tcKimlikNo || '-')}<br>
+            <strong>⚧ Cinsiyet:</strong> ${escapeHtml(member.cinsiyet || '-')}<br>
+            <strong>🎂 Doğum Tarihi:</strong> ${escapeHtml(member.dogumTarihi || '-')}<br>
+            <strong>🎓 Öğrenim Durumu:</strong> ${escapeHtml(member.ogrenimDurumu || '-')}<br>
+            <strong>🧾 Üye Niteliği / Türü:</strong> ${escapeHtml(member.uyeNiteligi || '-')} / ${escapeHtml(member.uyeTur || '-')}<br>
             <strong>🏅 Onursal Üye:</strong> ${member.onursalUye ? 'Evet' : 'Hayır'}<br>
-            <strong>📌 Durum:</strong> ${member.durum || '-'}<br>
-            <strong>🗓️ Yönetim Kurulu Karar Tarihi:</strong> ${member.yonetimKuruluKararTarihi || '-'}<br>
-            <strong>🚪 Pasif Olma Nedeni / Bildirim Tarihi:</strong> ${member.pasifOlmaNedeni || '-'} / ${member.pasifOlmaBildirimTarihi || '-'}
+            <strong>📌 Durum:</strong> ${escapeHtml(member.durum || '-')}<br>
+            <strong>🗓️ Yönetim Kurulu Karar Tarihi:</strong> ${escapeHtml(member.yonetimKuruluKararTarihi || '-')}<br>
+            <strong>🚪 Pasif Olma Nedeni / Bildirim Tarihi:</strong> ${escapeHtml(member.pasifOlmaNedeni || '-')} / ${escapeHtml(member.pasifOlmaBildirimTarihi || '-')}
         </div>
     `;
 }
