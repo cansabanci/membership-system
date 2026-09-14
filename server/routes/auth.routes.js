@@ -1,6 +1,8 @@
 const express = require('express');
 const userRepository = require('../../src/main/db/repositories/userRepository');
-const { EMAIL_REGEX, passwordPolicyHatasi } = require('../services/passwordPolicy');
+const { passwordPolicyHatasi } = require('../services/passwordPolicy');
+const otpService = require('../services/otpService');
+const { sendOtpEmail } = require('../services/emailService');
 const asyncHandler = require('../utils/asyncHandler');
 const { generateCsrfToken } = require('../middleware/csrf');
 const { requireAuth } = require('../middleware/auth');
@@ -10,6 +12,17 @@ const { checkThrottle, recordFailure, resetThrottle } = require('../middleware/l
 const router = express.Router();
 
 router.use(authRateLimiter);
+
+// Kullaniciya "kodu su adrese gonderdik" derken tam e-postayi degil, maskelenmis halini gosterir.
+function maskEmail(email) {
+  const atIndex = email.indexOf('@');
+  if (atIndex <= 1) return email;
+  const user = email.slice(0, atIndex);
+  const domain = email.slice(atIndex);
+  const middleLength = Math.max(user.length - 2, 1);
+  const masked = user.length > 1 ? `${user[0]}${'*'.repeat(middleLength)}${user[user.length - 1]}` : user;
+  return `${masked}${domain}`;
+}
 
 router.post(
   '/login',
@@ -69,23 +82,60 @@ router.get('/me', requireAuth, (req, res) => {
   res.json({ rol: req.session.rol, uyeId: req.session.uyeId, csrfToken });
 });
 
+// ---------- Hesap oluşturma: T.C. no + doğum tarihi sadece kaydı bulur, asıl güvenlik sınırı
+// üyenin derneğe kayıtlı e-postasına (uyeler.email) gönderilen OTP'dir. ----------
+
 router.post(
-  '/register',
+  '/register/request-otp',
   asyncHandler(async (req, res) => {
-    const { tcKimlikNo, dogumTarihi, email, password } = req.body || {};
-    if (!tcKimlikNo || !dogumTarihi || !email || !password) {
+    const { tcKimlikNo, dogumTarihi } = req.body || {};
+    if (!tcKimlikNo || !dogumTarihi) {
       return res.status(400).json({ error: 'Lütfen tüm alanları doldurun.' });
     }
-    if (!EMAIL_REGEX.test(email.trim())) {
-      return res.status(400).json({ error: 'Geçerli bir e-posta adresi girin.' });
+
+    const throttleKey = `register:${tcKimlikNo.trim()}`;
+    const throttle = checkThrottle(throttleKey);
+    if (throttle.blocked) {
+      return res.status(429).json({
+        error: `Çok fazla deneme. Lütfen ${Math.ceil(throttle.retryAfterSeconds / 60)} dakika sonra tekrar deneyin.`,
+      });
+    }
+
+    const member = await userRepository.findClaimableMember(tcKimlikNo.trim(), dogumTarihi);
+    if (!member) {
+      recordFailure(throttleKey);
+      return res.status(404).json({
+        error: 'T.C. Kimlik No ve doğum tarihi ile eşleşen bir üye bulunamadı, ya da bu üye için zaten bir hesap açılmış.',
+      });
+    }
+    if (!member.email) {
+      return res.status(400).json({ error: 'Sisteme kayıtlı bir e-postanız yok, lütfen derneğe başvurun.' });
+    }
+
+    const code = otpService.createOtp(throttleKey, member.email);
+    try {
+      await sendOtpEmail(member.email, code);
+    } catch (err) {
+      console.error('❌ OTP e-posta gönderim hatası:', err.message);
+      return res.status(503).json({ error: 'Doğrulama kodu gönderilemedi. Lütfen daha sonra tekrar deneyin.' });
+    }
+
+    res.json({ email: maskEmail(member.email) });
+  })
+);
+
+router.post(
+  '/register/verify',
+  asyncHandler(async (req, res) => {
+    const { tcKimlikNo, dogumTarihi, otp, password } = req.body || {};
+    if (!tcKimlikNo || !dogumTarihi || !otp || !password) {
+      return res.status(400).json({ error: 'Lütfen tüm alanları doldurun.' });
     }
     const sifreHatasi = passwordPolicyHatasi(password);
     if (sifreHatasi) {
       return res.status(400).json({ error: sifreHatasi });
     }
 
-    // Ayni T.C. Kimlik No'yu art arda deneyememe — dogum tarihini brute-force ile bulmaya
-    // calisma saldirisina karsi (roadmap Faz3).
     const throttleKey = `register:${tcKimlikNo.trim()}`;
     const throttle = checkThrottle(throttleKey);
     if (throttle.blocked) {
@@ -102,22 +152,64 @@ router.post(
       });
     }
 
-    const emailKullaniliyor = await userRepository.emailExists(email.trim());
+    const result = otpService.verifyOtp(throttleKey, otp);
+    if (!result.valid) {
+      recordFailure(throttleKey);
+      return res.status(400).json({ error: 'Kod hatalı ya da süresi dolmuş. Lütfen kodu tekrar isteyin.' });
+    }
+
+    const emailKullaniliyor = await userRepository.emailExists(member.email);
     if (emailKullaniliyor) {
       return res.status(409).json({ error: 'Bu e-posta adresi zaten kullanılıyor.' });
     }
 
     resetThrottle(throttleKey);
-    await userRepository.createAccount(member.id, email.trim(), password);
-    res.json({ adsoyad: member.adsoyad, email: email.trim() });
+    await userRepository.createAccount(member.id, member.email, password);
+    res.json({ adsoyad: member.adsoyad, email: member.email });
+  })
+);
+
+// ---------- Şifre sıfırlama: aynı iki-adımlı desen, hesabın MEVCUT giriş e-postasına gönderilir. ----------
+
+router.post(
+  '/reset-password/request-otp',
+  asyncHandler(async (req, res) => {
+    const { tcKimlikNo, dogumTarihi } = req.body || {};
+    if (!tcKimlikNo || !dogumTarihi) {
+      return res.status(400).json({ error: 'Lütfen tüm alanları doldurun.' });
+    }
+
+    const throttleKey = `reset:${tcKimlikNo.trim()}`;
+    const throttle = checkThrottle(throttleKey);
+    if (throttle.blocked) {
+      return res.status(429).json({
+        error: `Çok fazla deneme. Lütfen ${Math.ceil(throttle.retryAfterSeconds / 60)} dakika sonra tekrar deneyin.`,
+      });
+    }
+
+    const account = await userRepository.findAccountByIdentity(tcKimlikNo.trim(), dogumTarihi);
+    if (!account) {
+      recordFailure(throttleKey);
+      return res.status(404).json({ error: 'T.C. Kimlik No ve doğum tarihi ile eşleşen bir hesap bulunamadı.' });
+    }
+
+    const code = otpService.createOtp(throttleKey, account.email);
+    try {
+      await sendOtpEmail(account.email, code);
+    } catch (err) {
+      console.error('❌ OTP e-posta gönderim hatası:', err.message);
+      return res.status(503).json({ error: 'Doğrulama kodu gönderilemedi. Lütfen daha sonra tekrar deneyin.' });
+    }
+
+    res.json({ email: maskEmail(account.email) });
   })
 );
 
 router.post(
-  '/reset-password',
+  '/reset-password/verify',
   asyncHandler(async (req, res) => {
-    const { tcKimlikNo, dogumTarihi, password } = req.body || {};
-    if (!tcKimlikNo || !dogumTarihi || !password) {
+    const { tcKimlikNo, dogumTarihi, otp, password } = req.body || {};
+    if (!tcKimlikNo || !dogumTarihi || !otp || !password) {
       return res.status(400).json({ error: 'Lütfen tüm alanları doldurun.' });
     }
     const sifreHatasi = passwordPolicyHatasi(password);
@@ -137,6 +229,12 @@ router.post(
     if (!account) {
       recordFailure(throttleKey);
       return res.status(404).json({ error: 'T.C. Kimlik No ve doğum tarihi ile eşleşen bir hesap bulunamadı.' });
+    }
+
+    const result = otpService.verifyOtp(throttleKey, otp);
+    if (!result.valid) {
+      recordFailure(throttleKey);
+      return res.status(400).json({ error: 'Kod hatalı ya da süresi dolmuş. Lütfen kodu tekrar isteyin.' });
     }
     resetThrottle(throttleKey);
 

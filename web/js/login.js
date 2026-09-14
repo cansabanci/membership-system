@@ -60,8 +60,39 @@ function hideAllViews() {
     document.getElementById('resetView').style.display = 'none';
 }
 
+// ---------- Hesap Oluştur / Şifremi Unuttum: iki adımlı OTP akışı ----------
+// Adım 1: T.C. no + doğum tarihi -> kayıt bulunur, derneğe kayıtlı e-postaya kod gönderilir.
+// Adım 2: kod + şifre -> doğrulanırsa hesap oluşturulur / şifre güncellenir.
+let registerStep = 1;
+let registerTc = '';
+let registerDob = '';
+let resetStep = 1;
+let resetTc = '';
+let resetDob = '';
+
+function resetRegisterFormState() {
+    registerStep = 1;
+    registerTc = '';
+    registerDob = '';
+    document.getElementById('registerStep1Fields').style.display = '';
+    document.getElementById('registerStep2Fields').style.display = 'none';
+    document.getElementById('registerSubmitBtn').textContent = 'Kod Gönder';
+    document.getElementById('registerForm').reset();
+}
+
+function resetResetFormState() {
+    resetStep = 1;
+    resetTc = '';
+    resetDob = '';
+    document.getElementById('resetStep1Fields').style.display = '';
+    document.getElementById('resetStep2Fields').style.display = 'none';
+    document.getElementById('resetSubmitBtn').textContent = 'Kod Gönder';
+    document.getElementById('resetForm').reset();
+}
+
 function showRegisterView() {
     hideAllViews();
+    resetRegisterFormState();
     document.getElementById('registerView').style.display = 'block';
     document.getElementById('registerError').style.display = 'none';
     document.getElementById('registerSuccess').style.display = 'none';
@@ -74,12 +105,12 @@ function showLoginView() {
 
 function showResetView() {
     hideAllViews();
+    resetResetFormState();
     document.getElementById('resetView').style.display = 'block';
     document.getElementById('resetError').style.display = 'none';
     document.getElementById('resetSuccess').style.display = 'none';
 }
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_MIN_LENGTH = 8;
 
 function sifreKurallariniKontrolEt(value) {
@@ -121,18 +152,36 @@ function showRegisterError(message) {
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const tcKimlikNo = document.getElementById('regTcKimlikNo').value.trim();
-    const dogumTarihi = document.getElementById('regDogumTarihi').value;
-    const email = document.getElementById('regEmail').value.trim();
+    if (registerStep === 1) {
+        const tcKimlikNo = document.getElementById('regTcKimlikNo').value.trim();
+        const dogumTarihi = document.getElementById('regDogumTarihi').value;
+        if (!tcKimlikNo || !dogumTarihi) {
+            showRegisterError('Lütfen tüm alanları doldurun.');
+            return;
+        }
+
+        try {
+            const { email } = await apiFetch('POST', '/api/auth/register/request-otp', { tcKimlikNo, dogumTarihi });
+            registerTc = tcKimlikNo;
+            registerDob = dogumTarihi;
+            registerStep = 2;
+            document.getElementById('registerError').style.display = 'none';
+            document.getElementById('registerOtpHint').textContent = `Doğrulama kodu ${email} adresine gönderildi.`;
+            document.getElementById('registerStep1Fields').style.display = 'none';
+            document.getElementById('registerStep2Fields').style.display = 'block';
+            document.getElementById('registerSubmitBtn').textContent = 'Hesap Oluştur';
+        } catch (err) {
+            showRegisterError(err.message || 'Kod gönderilemedi.');
+        }
+        return;
+    }
+
+    const otp = document.getElementById('regOtp').value.trim();
     const password = document.getElementById('regPassword').value;
     const passwordConfirm = document.getElementById('regPasswordConfirm').value;
 
-    if (!tcKimlikNo || !dogumTarihi || !email || !password || !passwordConfirm) {
+    if (!otp || !password || !passwordConfirm) {
         showRegisterError('Lütfen tüm alanları doldurun.');
-        return;
-    }
-    if (!EMAIL_REGEX.test(email)) {
-        showRegisterError('Geçerli bir e-posta adresi girin.');
         return;
     }
     if (password !== passwordConfirm) {
@@ -146,14 +195,18 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     }
 
     try {
-        const { adsoyad } = await apiFetch('POST', '/api/auth/register', { tcKimlikNo, dogumTarihi, email, password });
+        const { adsoyad, email } = await apiFetch('POST', '/api/auth/register/verify', {
+            tcKimlikNo: registerTc,
+            dogumTarihi: registerDob,
+            otp,
+            password,
+        });
         document.getElementById('registerError').style.display = 'none';
         const successDiv = document.getElementById('registerSuccess');
         successDiv.textContent = `Hoş geldiniz ${adsoyad}! Hesabınız oluşturuldu, şimdi giriş yapabilirsiniz.`;
         successDiv.style.display = 'block';
 
         setTimeout(() => {
-            document.getElementById('registerForm').reset();
             showLoginView();
             document.getElementById('email').value = email;
             document.getElementById('password').focus();
@@ -162,6 +215,17 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         showRegisterError(err.message || 'Hesap oluşturulamadı.');
     }
 });
+
+async function resendRegisterOtp() {
+    if (!registerTc || !registerDob) return;
+    try {
+        const { email } = await apiFetch('POST', '/api/auth/register/request-otp', { tcKimlikNo: registerTc, dogumTarihi: registerDob });
+        document.getElementById('registerOtpHint').textContent = `Doğrulama kodu ${email} adresine tekrar gönderildi.`;
+        document.getElementById('registerError').style.display = 'none';
+    } catch (err) {
+        showRegisterError(err.message || 'Kod gönderilemedi.');
+    }
+}
 
 function showResetError(message) {
     const errorDiv = document.getElementById('resetError');
@@ -173,12 +237,35 @@ function showResetError(message) {
 document.getElementById('resetForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const tcKimlikNo = document.getElementById('resetTcKimlikNo').value.trim();
-    const dogumTarihi = document.getElementById('resetDogumTarihi').value;
+    if (resetStep === 1) {
+        const tcKimlikNo = document.getElementById('resetTcKimlikNo').value.trim();
+        const dogumTarihi = document.getElementById('resetDogumTarihi').value;
+        if (!tcKimlikNo || !dogumTarihi) {
+            showResetError('Lütfen tüm alanları doldurun.');
+            return;
+        }
+
+        try {
+            const { email } = await apiFetch('POST', '/api/auth/reset-password/request-otp', { tcKimlikNo, dogumTarihi });
+            resetTc = tcKimlikNo;
+            resetDob = dogumTarihi;
+            resetStep = 2;
+            document.getElementById('resetError').style.display = 'none';
+            document.getElementById('resetOtpHint').textContent = `Doğrulama kodu ${email} adresine gönderildi.`;
+            document.getElementById('resetStep1Fields').style.display = 'none';
+            document.getElementById('resetStep2Fields').style.display = 'block';
+            document.getElementById('resetSubmitBtn').textContent = 'Şifreyi Güncelle';
+        } catch (err) {
+            showResetError(err.message || 'Kod gönderilemedi.');
+        }
+        return;
+    }
+
+    const otp = document.getElementById('resetOtp').value.trim();
     const password = document.getElementById('resetPassword').value;
     const passwordConfirm = document.getElementById('resetPasswordConfirm').value;
 
-    if (!tcKimlikNo || !dogumTarihi || !password || !passwordConfirm) {
+    if (!otp || !password || !passwordConfirm) {
         showResetError('Lütfen tüm alanları doldurun.');
         return;
     }
@@ -193,14 +280,18 @@ document.getElementById('resetForm').addEventListener('submit', async (e) => {
     }
 
     try {
-        const { adsoyad, email } = await apiFetch('POST', '/api/auth/reset-password', { tcKimlikNo, dogumTarihi, password });
+        const { adsoyad, email } = await apiFetch('POST', '/api/auth/reset-password/verify', {
+            tcKimlikNo: resetTc,
+            dogumTarihi: resetDob,
+            otp,
+            password,
+        });
         document.getElementById('resetError').style.display = 'none';
         const successDiv = document.getElementById('resetSuccess');
         successDiv.textContent = `${adsoyad}, şifreniz güncellendi! Şimdi yeni şifrenizle giriş yapabilirsiniz.`;
         successDiv.style.display = 'block';
 
         setTimeout(() => {
-            document.getElementById('resetForm').reset();
             showLoginView();
             document.getElementById('email').value = email;
             document.getElementById('password').focus();
@@ -209,3 +300,14 @@ document.getElementById('resetForm').addEventListener('submit', async (e) => {
         showResetError(err.message || 'Şifre güncellenemedi.');
     }
 });
+
+async function resendResetOtp() {
+    if (!resetTc || !resetDob) return;
+    try {
+        const { email } = await apiFetch('POST', '/api/auth/reset-password/request-otp', { tcKimlikNo: resetTc, dogumTarihi: resetDob });
+        document.getElementById('resetOtpHint').textContent = `Doğrulama kodu ${email} adresine tekrar gönderildi.`;
+        document.getElementById('resetError').style.display = 'none';
+    } catch (err) {
+        showResetError(err.message || 'Kod gönderilemedi.');
+    }
+}

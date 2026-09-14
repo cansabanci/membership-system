@@ -25,7 +25,7 @@ async function findClaimableMember(tcKimlikNo, dogumTarihi) {
     .input('tcKimlikNo', sql.NVarChar, tcKimlikNo)
     .input('dogumTarihi', sql.NVarChar, dogumTarihi)
     .query(`
-      SELECT u.id, u.adsoyad
+      SELECT u.id, u.adsoyad, u.email
       FROM uyeler u
       WHERE u.tcKimlikNo = @tcKimlikNo AND u.dogumTarihi = @dogumTarihi
         AND NOT EXISTS (SELECT 1 FROM kullanicilar k WHERE k.uye_id = u.id)
