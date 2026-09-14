@@ -112,9 +112,14 @@ router.post(
       return res.status(400).json({ error: 'Sisteme kayıtlı bir e-postanız yok, lütfen derneğe başvurun.' });
     }
 
-    const code = otpService.createOtp(throttleKey, member.email);
+    const otpResult = otpService.createOtp(throttleKey, member.email);
+    if (otpResult.throttled) {
+      return res.status(429).json({
+        error: `Kod az önce gönderildi. Lütfen ${otpResult.retryAfterSeconds} saniye sonra tekrar deneyin.`,
+      });
+    }
     try {
-      await sendOtpEmail(member.email, code);
+      await sendOtpEmail(member.email, otpResult.code);
     } catch (err) {
       console.error('❌ OTP e-posta gönderim hatası:', err.message);
       return res.status(503).json({ error: 'Doğrulama kodu gönderilemedi. Lütfen daha sonra tekrar deneyin.' });
@@ -193,9 +198,14 @@ router.post(
       return res.status(404).json({ error: 'T.C. Kimlik No ve doğum tarihi ile eşleşen bir hesap bulunamadı.' });
     }
 
-    const code = otpService.createOtp(throttleKey, account.email);
+    const otpResult = otpService.createOtp(throttleKey, account.email);
+    if (otpResult.throttled) {
+      return res.status(429).json({
+        error: `Kod az önce gönderildi. Lütfen ${otpResult.retryAfterSeconds} saniye sonra tekrar deneyin.`,
+      });
+    }
     try {
-      await sendOtpEmail(account.email, code);
+      await sendOtpEmail(account.email, otpResult.code);
     } catch (err) {
       console.error('❌ OTP e-posta gönderim hatası:', err.message);
       return res.status(503).json({ error: 'Doğrulama kodu gönderilemedi. Lütfen daha sonra tekrar deneyin.' });
