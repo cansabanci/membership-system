@@ -121,10 +121,35 @@ function getPhotoFile() {
     return photoInput.files.length > 0 ? photoInput.files[0] : null;
 }
 
+// Telefon kameralarından gelen fotoğraflar sıkıştırılmadan 6-15MB olabiliyor — sunucunun
+// istek boyutu sınırını (8MB) aşıp "request entity too large" hatasına yol açıyordu (özellikle
+// Android'de, iPhone'un otomatik HEIC sıkıştırması olmadığı için daha sık görülüyor). Bu yüzden
+// göndermeden önce tarayıcıda canvas ile en fazla 1600px'e küçültüp JPEG olarak sıkıştırıyoruz.
+const PHOTO_MAX_DIMENSION = 1600;
+const PHOTO_JPEG_QUALITY = 0.82;
+
 function readPhotoAsDataUrl(file) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
+        reader.onloadend = () => {
+            const img = new Image();
+            img.onload = () => {
+                let { width, height } = img;
+                if (width > PHOTO_MAX_DIMENSION || height > PHOTO_MAX_DIMENSION) {
+                    const scale = PHOTO_MAX_DIMENSION / Math.max(width, height);
+                    width = Math.round(width * scale);
+                    height = Math.round(height * scale);
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', PHOTO_JPEG_QUALITY));
+            };
+            img.onerror = () => resolve(reader.result); // sıkıştırma başarısız olursa ham veriyle devam et
+            img.src = reader.result;
+        };
+        reader.onerror = () => reject(reader.error);
         reader.readAsDataURL(file);
     });
 }
