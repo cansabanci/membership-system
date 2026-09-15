@@ -13,11 +13,18 @@ if ('serviceWorker' in navigator) {
 }
 
 // ---------- 2) "Ana ekrana ekle" cubugu ----------
-// Android: tarayici 'beforeinstallprompt' event'ini verir, butona basinca sistemin
-//   kendi kurulum penceresini aciyoruz — uye hicbir menu aramak zorunda kalmiyor.
-// iPhone/iPad: iOS bu event'i HIC desteklemiyor, kurulum programatik olarak
-//   tetiklenemiyor. Orada tek yapilabilecek, Paylas menusunu adim adim anlatmak —
-//   bu yuzden ayni butona basinca anlatim penceresi aciliyor.
+// Cubuk TUM telefon tarayicilarinda gosterilir; butona basinca ne olacagi tarayicinin
+// yetenegine gore degisir:
+//   - 'beforeinstallprompt' veren tarayici (Chrome/Edge/Samsung Internet): sistemin
+//     kendi kurulum penceresi acilir — uye hicbir menu aramak zorunda kalmaz.
+//   - Vermeyen tarayici (iPhone'da HEPSI, Android'de Mi Browser/Firefox/uygulama ici
+//     tarayicilar): kurulum programatik tetiklenemez, o yuzden o platforma uygun
+//     adim adim anlatim penceresi acilir.
+// Ilk surumde cubuk SADECE event gelince gosteriliyordu; Android'de Chrome disi bir
+// tarayicida test edilince cubugun hic cikmadigi gorulduu (15 Eylul 2026), bu yuzden
+// gosterim event'ten bagimsiz hale getirildi: event gelirse hemen, gelmezse kisa bir
+// bekleme sonrasi cikar (bekleme, gelecekse event'in one gecip tek-dokunus yolunu
+// acabilmesi icin).
 (function () {
     var KAPATILDI_ANAHTARI = 'anaEkranaEkleGizlendi';
 
@@ -53,8 +60,8 @@ if ('serviceWorker' in navigator) {
         cubuguKaldir();
     }
 
-    // --- iOS anlatim penceresi ---
-    function iosPenceresiniAc() {
+    // --- Anlatim penceresi (kurulumu kendi tetikleyemeyen tarayicilar icin) ---
+    function anlatimPenceresiniAc() {
         var katman = document.createElement('div');
         katman.className = 'install-sheet';
 
@@ -67,28 +74,39 @@ if ('serviceWorker' in navigator) {
 
         var altBaslik = document.createElement('p');
         altBaslik.className = 'install-sheet__sub';
-        altBaslik.textContent = 'iPhone bunu otomatik yapamıyor, üç küçük adım gerekiyor. Safari ile açmış olman gerekiyor.';
 
         var adimlar = document.createElement('ol');
         adimlar.className = 'install-sheet__steps';
 
-        // 1. adim: Paylas ikonunu da goster ki kullanici hangi butonu arayacagini bilsin.
         var adim1 = document.createElement('li');
         adim1.appendChild(numara('1'));
         var metin1 = document.createElement('span');
-        metin1.appendChild(document.createTextNode('Ekranın altındaki '));
-        metin1.appendChild(paylasIkonu());
-        metin1.appendChild(document.createTextNode(' Paylaş butonuna dokun.'));
-        adim1.appendChild(metin1);
 
         var adim2 = document.createElement('li');
         adim2.appendChild(numara('2'));
-        adim2.appendChild(metinSpan('Listeyi aşağı kaydır, "Ana Ekrana Ekle"ye dokun.'));
 
         var adim3 = document.createElement('li');
         adim3.appendChild(numara('3'));
-        adim3.appendChild(metinSpan('Sağ üstteki "Ekle" ile onayla. Hepsi bu!'));
 
+        if (iOS) {
+            altBaslik.textContent = 'iPhone bunu otomatik yapamıyor, üç küçük adım gerekiyor. Safari ile açmış olman gerekiyor.';
+            // Paylas ikonunu da goster ki kullanici hangi butonu arayacagini bilsin.
+            metin1.appendChild(document.createTextNode('Ekranın altındaki '));
+            metin1.appendChild(paylasIkonu());
+            metin1.appendChild(document.createTextNode(' Paylaş butonuna dokun.'));
+            adim2.appendChild(metinSpan('Listeyi aşağı kaydır, "Ana Ekrana Ekle"ye dokun.'));
+            adim3.appendChild(metinSpan('Sağ üstteki "Ekle" ile onayla. Hepsi bu!'));
+        } else {
+            // Android'de Chrome disi tarayicilar (Mi Browser, Firefox, WhatsApp/Instagram
+            // ici tarayici...) kurulumu programatik tetiklemeye izin vermiyor. Menu simgesi
+            // ve secenegin adi tarayiciya gore degistigi icin ikisi de alternatifleriyle yazildi.
+            altBaslik.textContent = 'Kullandığın tarayıcı bunu otomatik yapamıyor, menüden eklemen gerekiyor.';
+            metin1.appendChild(document.createTextNode('Tarayıcının menüsünü aç — ekranın köşesindeki ⋮ ya da ☰ simgesi.'));
+            adim2.appendChild(metinSpan('"Ana ekrana ekle" seçeneğine dokun. (Bazı tarayıcılarda "Uygulamayı yükle" ya da "Sayfayı ekle" yazar.)'));
+            adim3.appendChild(metinSpan('Çıkan pencerede "Ekle" ile onayla. Böyle bir seçenek yoksa sayfayı Chrome\'da açıp tekrar dene.'));
+        }
+
+        adim1.appendChild(metin1);
         adimlar.appendChild(adim1);
         adimlar.appendChild(adim2);
         adimlar.appendChild(adim3);
@@ -217,17 +235,20 @@ if ('serviceWorker' in navigator) {
                     .catch(cubuguKaldir);
                 bekleyenPrompt = null;
             } else {
-                // iOS (ve prompt vermeyen diger tarayicilar): anlatim penceresi
-                iosPenceresiniAc();
+                // Kurulumu kendi tetikleyemeyen tarayicilar: adim adim anlatim
+                anlatimPenceresiniAc();
             }
         });
     }
 
-    // Android/Chrome: tarayici "bu site kurulabilir" dediginde event'i saklayip cubugu gosteriyoruz.
+    // "Bu site kurulabilir" sinyali — sadece bazi tarayicilar verir (Chrome, Edge,
+    // Samsung Internet). Geldiginde beklemeyi iptal edip cubugu hemen gosteriyoruz;
+    // artik buton tek dokunusla kurabilir.
     window.addEventListener('beforeinstallprompt', function (event) {
         // Tarayicinin kendi otomatik banner'ini bastir, kontrolu bizim butona verelim.
         event.preventDefault();
         bekleyenPrompt = event;
+        clearTimeout(gecikmeliGosterim);
         cubuguGoster();
     });
 
@@ -237,12 +258,14 @@ if ('serviceWorker' in navigator) {
         kalicalKapat();
     });
 
-    // iOS'ta beforeinstallprompt hic gelmeyecegi icin cubugu dogrudan gosteriyoruz.
-    if (iOS) {
+    // Sinyal gelmezse de cubuk cikmali (iPhone'da hicbir zaman gelmez; Android'de de
+    // Chrome disi tarayicilarda gelmez). Kisa bekleme, sinyal gelecekse one gecip
+    // tek-dokunus yolunu acabilmesi icin.
+    var gecikmeliGosterim = setTimeout(function () {
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', cubuguGoster);
         } else {
             cubuguGoster();
         }
-    }
+    }, 2000);
 })();
