@@ -215,6 +215,23 @@ function showErrorBanner(message) {
     window.dispatchEvent(new Event('app-ready'));
 })();
 
+// ---------- Telefon kisayolu (ana ekrana eklenen surum) icin tazeleme korumasi ----------
+// iOS, ana ekran kisayolunu arka plana alinca sayfayi "geri/ileri onbellegine" (bfcache)
+// donduruyor; geri donuldugunde DOM oldugu gibi geri yukleniyor ama script'ler YENIDEN
+// CALISMIYOR. Sayfa yukaridaki bootstrap tamamlanmadan donmussa body'de 'role-pending'
+// kaliyor ve profil karti/uye listesi sonsuza kadar gizli kaliyor (15 Eylul 2026 telefon
+// testinde birebir bu yasandi: sunucu loglarinda sayfa 200 donmus ama /api/auth/me hic
+// cagrilmamisti). Ayrica uygulama uzun sure arka planda kaldiysa oturum da dusmus olabilir.
+// Iki durumda da en dogru davranis sayfayi tazelemek: oturum gecerliyse ekran dolar,
+// dusmusse sunucu zaten /login'e yonlendirir.
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) window.location.reload();
+});
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && !window.__appReady) window.location.reload();
+});
+
 async function logout() {
     try {
         await apiFetch('POST', '/api/auth/logout');
